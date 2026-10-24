@@ -1,0 +1,74 @@
+[project]
+name = "fwaudit"
+version = "0.1.0"
+description = "Offline firmware image auditor: identification, safe extraction, entropy map and filesystem security audit."
+readme = "README.md"
+license = "MIT"
+authors = [{ name = "archit2501" }]
+requires-python = ">=3.12"
+dependencies = [
+    "cryptography==50.0.2",
+    "numpy==2.5.4",
+    "pysquashfsimage==0.9.0",
+]
+
+[project.scripts]
+fwaudit = "fwaudit.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.11.28,<0.12.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "hypothesis==6.170.9",
+    "jsonschema==4.26.0",
+    "mypy==2.4.0",
+    "pytest==9.1.1",
+    "pytest-cov==7.1.0",
+    "ruff==0.17.2",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests", "scripts"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "C4", "RUF", "PT", "PL", "S", "N", "RET", "PTH", "TRY"]
+ignore = [
+    "PLR0911", "PLR0912", "PLR0913", "PLR0915", "PLR2004",
+    "S311",    # random is used only for deterministic synthetic fixtures
+    "S324",    # md5/sha1 are part of the crypt algorithms we must implement
+    "TRY003",  # descriptive exception messages are intentional
+    "S603", "S607",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S105", "S106", "S108", "PLR2004", "PLC0415", "PT011"]
+"scripts/**" = ["S101", "T201"]
+"src/fwaudit/synth/**" = ["S105", "S106"]
+
+[tool.mypy]
+strict = true
+python_version = "3.12"
+files = ["src/fwaudit", "scripts"]
+warn_unreachable = true
+
+[[tool.mypy.overrides]]
+module = ["PySquashfsImage", "PySquashfsImage.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers"
+markers = ["slow: longer-running end-to-end tests"]
+
+[tool.coverage.run]
+source = ["fwaudit"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+exclude_lines = ["pragma: no cover", "if TYPE_CHECKING:", "raise NotImplementedError"]
