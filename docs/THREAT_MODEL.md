@@ -38,7 +38,7 @@ analysis tools or to hide weaknesses from them.
 | Oversized inputs | Image size checked against `max_image_bytes` before reading | `pipeline.py` |
 | Parser crashes (malformed headers, truncation, cyclic squashfs directories) | Every parser raises `FormatError`; the engine turns it into a note and continues; library exceptions and `RecursionError` are converted. Hypothesis property tests feed random and mutated images and assert no exception and no check errors | `formats/*`, `tests/test_fuzz.py`, `tests/test_formats.py` |
 | CPU exhaustion through crypt rounds (`$6$rounds=999999999$`) | Hashes with more than 50,000 rounds are not tried | `audit/cryptpw.py` |
-| Regex denial of service | PEM body match bounded to 64 KiB; config scanning restricted to text files ≤ 256 KiB and applied line by line | `audit/keys.py`, `audit/configs.py` |
+| Regex denial of service | PEM blocks found by a linear scanner (BEGIN headers in one pass, END markers indexed once and paired by binary search, body ≤ 64 KiB), O(n log n) even for floods of unmatched markers; a regression test times 1 MiB floods and a 10 KB gzip flood image. Config scanning restricted to text files ≤ 256 KiB and applied line by line | `audit/keys.py`, `audit/configs.py` |
 | A broken check aborting the audit | Checks run under a per-check exception boundary; failures are listed in `check_errors` | `audit/__init__.py` |
 | Tampered CVE database making old components look clean | SHA-256 pin of `cve_subset.json` compiled into the code and checked on load | `audit/cvedb.py` |
 | Secret leakage via reports or CI logs | Secrets masked (2-character hint and length) unless `--show-secrets` | `audit/base.py` |

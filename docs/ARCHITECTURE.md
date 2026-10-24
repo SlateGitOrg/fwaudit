@@ -145,7 +145,7 @@ class (`high` ≥ 7.2 bits/byte, `low` ≤ 1.0, else `mixed`) merge into regions
 |---|---|---|
 | accounts | Parse passwd/shadow; passwd field overrides shadow; per hash: scheme, weak flag, then try each default password for that user (`crack`) | O(users x defaults x hash cost); sha-crypt rounds capped at 50,000 per guess |
 | config secrets | Text files under system prefixes, ≤ 256 KiB, ≥ 90 % printable; per line: chpasswd, URL credentials, UCI `option`, key=value / quoted JSON-YAML keys; placeholders, booleans and policy keys (`password_min_len`) excluded | O(total text) |
-| keys | Bounded PEM regex (body ≤ 64 KiB) parsed with `cryptography`; dropbear binary host keys decoded from their SSH-string layout; DER certificates by extension; certificate expiry against `reference_time` | O(file bytes) |
+| keys | Linear PEM scanner (BEGIN headers matched in one pass, END markers indexed once, paired by binary search; body ≤ 64 KiB) parsed with `cryptography`; dropbear binary host keys decoded from their SSH-string layout; DER certificates by extension; certificate expiry against `reference_time` | O(file bytes · log) |
 | components | Four compiled regexes over ELF files only; each (component, version) is matched against OSV-style ranges (`introduced <= v < fixed` or `<= last_affected`) | O(ELF bytes + CVEs) |
 | services | Startup files by glob; commands only count in command position (start of line, inittab process field, after exec / nohup / start-stop-daemon); inetd and xinetd service blocks; htpasswd / htdigest / BusyBox httpd.conf credentials checked against defaults; vsftpd, snmpd, sshd_config | O(config text x defaults) |
 | permissions | Mode bits from the archive metadata | O(f) |
