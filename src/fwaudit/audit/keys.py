@@ -1,10 +1,10 @@
 """Embedded key material: private keys and X.509 certificates.
 
-PEM blocks are located with a bounded regular expression and parsed with
-``cryptography``; DER certificates are recognised by extension, and dropbear's binary
-host-key format is decoded directly. The same analysis runs on files inside mounted
-filesystems and on raw image regions that no container claimed (e.g. a key sitting in
-an NVRAM partition).
+PEM blocks are located in linear time (BEGIN headers matched in one pass, END markers
+indexed in one pass and paired by binary search) and parsed with ``cryptography``; DER
+certificates are recognised by extension, and dropbear's binary host-key format is decoded
+directly. The same analysis runs on files inside mounted filesystems and on raw image
+regions that no container claimed (e.g. a key sitting in an NVRAM partition).
 
 Each private key is fingerprinted (SHA-256 of its SubjectPublicKeyInfo) so the report can
 show when one key is reused across several locations.
@@ -13,9 +13,11 @@ show when one key is reused across several locations.
 from __future__ import annotations
 
 import base64
+import bisect
 import hashlib
 import re
 import struct
+from collections.abc import Iterator
 from dataclasses import dataclass
 from datetime import timedelta
 
@@ -29,10 +31,52 @@ from fwaudit.audit.base import AuditConfig
 from fwaudit.model import Finding, JsonValue, Severity, make_finding
 from fwaudit.vfs import VirtualFS
 
-PEM_RE = re.compile(
-    rb"-----BEGIN (?P<label>[A-Z0-9 ]{3,40})-----(?P<body>.{1,65536}?)-----END (?P=label)-----",
-    re.DOTALL,
-)
+PEM_MAX_BODY = 65536
+_PEM_BEGIN_RE = re.compile(rb"-----BEGIN ([A-Z0-9 ]{3,40})-----")
+# Lookahead so END markers that overlap (``-----END A-----END B-----``) are all indexed.
+_PEM_END_RE = re.compile(rb"(?=-----END ([A-Z0-9 ]{3,40})-----)")
+
+
+@dataclass(frozen=True)
+class PemBlock:
+    start: int
+    label: bytes
+    block: bytes
+    body: bytes
+
+
+def iter_pem_blocks(data: bytes, max_body: int = PEM_MAX_BODY) -> Iterator[PemBlock]:
+    """Yield PEM blocks in order, in O(n log n) time for adversarial input.
+
+    Same blocks as the backtracking pattern
+    ``-----BEGIN (L)-----(.{1,65536}?)-----END (?P=L)-----`` (DOTALL) under ``finditer``:
+    each BEGIN pairs with the first END of the same label whose body is 1..``max_body``
+    bytes,
+    the scan resumes after a matched END, and a BEGIN without a partner is skipped by one
+    byte. That pattern costs O(n x 64 KiB) on a flood of unmatched BEGIN headers; here every
+    END marker is indexed once and each BEGIN is a binary search.
+    """
+    if b"-----BEGIN " not in data:
+        return
+    ends: dict[bytes, list[int]] = {}
+    for end_match in _PEM_END_RE.finditer(data):
+        ends.setdefault(end_match.group(1), []).append(end_match.start())
+    pos = 0
+    while (m := _PEM_BEGIN_RE.search(data, pos)) is not None:
+        label = m.group(1)
+        positions = ends.get(label)
+        if positions:
+            body_start = m.end()
+            i = bisect.bisect_left(positions, body_start + 1)
+            if i < len(positions) and positions[i] <= body_start + max_body:
+                end = positions[i]
+                stop = end + len(b"-----END ") + len(label) + len(b"-----")
+                yield PemBlock(m.start(), label, data[m.start() : stop], data[body_start:end])
+                pos = stop
+                continue
+        pos = m.start() + 1
+
+
 PRIVATE_LABELS = {
     b"RSA PRIVATE KEY",
     b"EC PRIVATE KEY",
@@ -164,18 +208,16 @@ class KeyAnalyzer:
         base_offset: int | None = None,
     ) -> list[Finding]:
         out: list[Finding] = []
-        if b"-----BEGIN " in data:
-            for index, m in enumerate(PEM_RE.finditer(data)):
-                label = m.group("label")
-                loc = _Loc(filesystem, path, base_offset, m.start(), index)
-                if label in PRIVATE_LABELS:
-                    out += self._private(label, m.group(0), m.group("body"), loc)
-                elif label in CERT_LABELS:
-                    try:
-                        cert = x509.load_pem_x509_certificate(m.group(0))
-                    except ValueError:
-                        continue
-                    out += self._certificate(cert, loc)
+        for index, pem in enumerate(iter_pem_blocks(data)):
+            loc = _Loc(filesystem, path, base_offset, pem.start, index)
+            if pem.label in PRIVATE_LABELS:
+                out += self._private(pem.label, pem.block, pem.body, loc)
+            elif pem.label in CERT_LABELS:
+                try:
+                    cert = x509.load_pem_x509_certificate(pem.block)
+                except ValueError:
+                    continue
+                out += self._certificate(cert, loc)
         return out
 
     def analyze_der_certificate(self, data: bytes, *, filesystem: str, path: str) -> list[Finding]:
