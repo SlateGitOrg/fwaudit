@@ -3,7 +3,9 @@
   "components": [
     {
       "component": "busybox",
-      "cves": [],
+      "cves": [
+        "CVE-2022-48174"
+      ],
       "filesystem": "image/squashfs@0x10000",
       "paths": [
         "/bin/busybox"
@@ -152,6 +154,33 @@
     }
   ],
   "findings": [
+    {
+      "category": "component",
+      "detail": "busybox 1.36.1 is affected by 1 CVE(s) in the offline subset: CVE-2022-48174",
+      "evidence": {
+        "component": "busybox",
+        "cves": [
+          {
+            "affected": ">= 0, <= 1.36.1",
+            "cvss": 9.8,
+            "id": "CVE-2022-48174",
+            "summary": "ash stack overflow in arithmetic evaluation, may lead to code execution"
+          }
+        ],
+        "paths": [
+          "/bin/busybox"
+        ],
+        "version": "1.36.1"
+      },
+      "filesystem": "image/squashfs@0x10000",
+      "id": "F-c29e9e0ec764",
+      "offset": null,
+      "path": "/bin/busybox",
+      "remediation": "Upgrade the component to a fixed release.",
+      "rule_id": "FWA-CMP-002",
+      "severity": "critical",
+      "title": "Component version affected by known CVEs (offline subset)"
+    },
     {
       "category": "credentials",
       "detail": "account 'root' can log in without a password",
@@ -468,14 +497,14 @@
   "summary": {
     "archive_entries": 54,
     "by_category": {
-      "component": 3,
+      "component": 4,
       "credentials": 6,
       "crypto": 4,
       "extraction": 1,
       "permissions": 1
     },
     "by_severity": {
-      "critical": 2,
+      "critical": 3,
       "high": 6,
       "info": 4,
       "low": 0,
@@ -484,7 +513,7 @@
     "carved_regions": 3,
     "extracted_bytes": 86409,
     "filesystems": 1,
-    "findings": 15,
+    "findings": 16,
     "highest_severity": "critical"
   },
   "tool": {

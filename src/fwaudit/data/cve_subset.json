@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "source": "NVD CVE API 2.0 (descriptions, CPE configurations and CVSS base scores), retrieved 2026-10-25",
+  "source": "NVD CVE API 2.0: CVSS v3.x Primary base scores and vulnerable CPE version ranges. Cross-checked against the live API on 2026-10-25 with scripts/verify_cvedb.py",
   "note": "Curated offline SUBSET for demonstration. Not exhaustive: absence of a CVE here says nothing about a component's safety.",
   "entries": [
     {
@@ -187,11 +187,11 @@
       "component": "busybox",
       "cvss": 9.8,
       "cvss_version": "3.1",
-      "summary": "ash stack overflow leading to code execution",
+      "summary": "ash stack overflow in arithmetic evaluation, may lead to code execution",
       "ranges": [
         {
           "introduced": "0",
-          "fixed": "1.35.0"
+          "last_affected": "1.36.1"
         }
       ]
     },

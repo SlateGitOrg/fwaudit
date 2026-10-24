@@ -17,7 +17,7 @@ from fwaudit.audit.versions import VersionRange
 from fwaudit.errors import CveDatabaseError
 from fwaudit.model import Severity
 
-CVEDB_SHA256 = "bd6cf315f2181dd15a43033e367d4eebb7e94e35af5a97b171c3e4478f87f05b"
+CVEDB_SHA256 = "147b4bd6403400cecd9c4ac36bf2bdc4f76b168ebb2708612866e5177311eb51"
 
 
 @dataclass(frozen=True)

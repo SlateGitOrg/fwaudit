@@ -1,6 +1,6 @@
 {
-  "elapsed_seconds": 7.94,
-  "expected_findings": 1839,
+  "elapsed_seconds": 8.88,
+  "expected_findings": 1865,
   "false_negatives": [],
   "false_positives": [],
   "image_bytes": 11265031,
@@ -18,7 +18,7 @@
       "fp": 0,
       "precision": 1.0,
       "recall": 1.0,
-      "tp": 210
+      "tp": 236
     },
     "FWA-CRED-001": {
       "fn": 0,
@@ -195,6 +195,6 @@
     "fp": 0,
     "precision": 1.0,
     "recall": 1.0,
-    "tp": 1839
+    "tp": 1865
   }
 }
