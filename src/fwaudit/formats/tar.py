@@ -113,7 +113,10 @@ def parse(data: bytes | memoryview, budget: Budget, *, what: str = "tar") -> Tar
             else:
                 rdev = (member.devmajor, member.devminor) if member.isdev() else None
                 entries.append(ArchiveEntry(name, kind, mode, member.uid, member.gid, rdev=rdev))
-        consumed = min(len(raw), tf.offset + 2 * BLOCK)
+        end = tf.offset
+        if raw[end : end + BLOCK] != b"\x00" * BLOCK:
+            complete = False  # no end-of-archive marker: truncated (or trailing garbage)
+        consumed = min(len(raw), end + 2 * BLOCK)
     return TarResult(entries, consumed, complete)
 
 

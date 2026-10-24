@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "fwaudit-report/1",
+  "title": "fwaudit report",
+  "type": "object",
+  "required": ["schema", "tool", "image", "settings", "summary", "entropy", "extraction",
+               "filesystems", "components", "shared_keys", "findings", "check_errors"],
+  "additionalProperties": false,
+  "properties": {
+    "schema": {"const": "fwaudit-report/1"},
+    "tool": {
+      "type": "object",
+      "required": ["name", "version"],
+      "properties": {"name": {"const": "fwaudit"}, "version": {"type": "string"}}
+    },
+    "image": {
+      "type": "object",
+      "required": ["name", "size", "sha256"],
+      "properties": {
+        "name": {"type": "string"},
+        "size": {"type": "integer", "minimum": 0},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
+    "settings": {
+      "type": "object",
+      "required": ["reference_time", "show_secrets", "entropy_block_size", "limits"],
+      "properties": {
+        "reference_time": {"type": "string"},
+        "show_secrets": {"type": "boolean"},
+        "entropy_block_size": {"type": "integer", "minimum": 1},
+        "limits": {"type": "object", "additionalProperties": {"type": "integer"}}
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": ["findings", "highest_severity", "by_severity", "by_category", "filesystems",
+                   "extracted_bytes", "archive_entries", "carved_regions"],
+      "properties": {
+        "findings": {"type": "integer", "minimum": 0},
+        "highest_severity": {"enum": ["critical", "high", "medium", "low", "info", null]},
+        "by_severity": {
+          "type": "object",
+          "required": ["critical", "high", "medium", "low", "info"],
+          "additionalProperties": {"type": "integer"}
+        },
+        "by_category": {"type": "object", "additionalProperties": {"type": "integer"}},
+        "filesystems": {"type": "integer"},
+        "extracted_bytes": {"type": "integer"},
+        "archive_entries": {"type": "integer"},
+        "carved_regions": {"type": "integer"}
+      }
+    },
+    "entropy": {
+      "type": "object",
+      "required": ["block_size", "mean", "sparkline", "regions"],
+      "properties": {
+        "regions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["start", "end", "kind", "mean_entropy"],
+            "properties": {"kind": {"enum": ["high", "low", "mixed"]}}
+          }
+        }
+      }
+    },
+    "extraction": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "kind", "offset", "length", "depth", "parent", "meta", "notes", "children"],
+        "properties": {
+          "id": {"type": "string"},
+          "kind": {"type": "string"},
+          "offset": {"type": "integer"},
+          "length": {"type": "integer"},
+          "depth": {"type": "integer", "minimum": 0},
+          "parent": {"type": ["string", "null"]},
+          "meta": {"type": "object"},
+          "notes": {"type": "array", "items": {"type": "string"}},
+          "children": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    },
+    "filesystems": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "format", "offset", "entries", "files", "file_bytes", "rejected_members"]
+      }
+    },
+    "components": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["filesystem", "component", "version", "paths", "cves"]
+      }
+    },
+    "shared_keys": {
+      "type": "array",
+      "items": {"type": "object", "required": ["fingerprint", "locations"]}
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "rule_id", "severity", "category", "title", "detail", "filesystem",
+                     "path", "offset", "evidence", "remediation"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {"type": "string", "pattern": "^F-[0-9a-f]{12}$"},
+          "rule_id": {"type": "string", "pattern": "^FWA-[A-Z]+-[0-9]{3}$"},
+          "severity": {"enum": ["critical", "high", "medium", "low", "info"]},
+          "category": {"enum": ["extraction", "credentials", "crypto", "component", "service",
+                                "permissions"]},
+          "title": {"type": "string"},
+          "detail": {"type": "string"},
+          "filesystem": {"type": "string"},
+          "path": {"type": ["string", "null"]},
+          "offset": {"type": ["integer", "null"]},
+          "evidence": {"type": "object"},
+          "remediation": {"type": "string"}
+        }
+      }
+    },
+    "check_errors": {"type": "array", "items": {"type": "string"}}
+  }
+}

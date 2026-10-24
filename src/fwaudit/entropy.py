@@ -80,7 +80,7 @@ def block_entropies(data: bytes | memoryview, block_size: int = 4096) -> npt.NDA
         probs = counts / lengths
         with np.errstate(divide="ignore", invalid="ignore"):
             logs = np.where(probs > 0, np.log2(probs), 0.0)
-        out[first:last] = -(probs * logs).sum(axis=1)
+        out[first:last] = 0.0 - (probs * logs).sum(axis=1)  # 0.0 - x avoids -0.0
     return out
 
 

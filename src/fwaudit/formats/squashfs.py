@@ -86,8 +86,10 @@ def parse_superblock(data: bytes | memoryview) -> Superblock:
         root_inode=f[11],
         bytes_used=f[12],
     )
-    if sb.version != (4, 0):
+    if sb.version[0] in (1, 2, 3):
         raise UnsupportedFormatError(f"squashfs: version {sb.version[0]}.{sb.version[1]}")
+    if sb.version != (4, 0):
+        raise FormatError("squashfs: implausible version")
     if not 4096 <= sb.block_size <= 1024 * 1024 or sb.block_size != 1 << sb.block_log:
         raise FormatError("squashfs: implausible block size")
     if sb.bytes_used < SUPERBLOCK_SIZE:
