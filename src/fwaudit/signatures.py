@@ -69,7 +69,8 @@ def _v_gzip(data: memoryview, off: int) -> Meta | None:
     if off + 10 > len(data):
         return None
     flags, xfl, os_ = data[off + 3], data[off + 8], data[off + 9]
-    if flags & 0xE0 or xfl not in (0, 2, 4) or (os_ > 13 and os_ != 255):
+    # RFC 1952 defines OS codes 0-13; zlib builds also emit 19 (macOS) and 255 (unknown).
+    if flags & 0xE0 or xfl not in (0, 2, 4) or (os_ > 31 and os_ != 255):
         return None
     return {}
 
