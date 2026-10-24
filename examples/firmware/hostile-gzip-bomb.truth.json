@@ -1,0 +1,18 @@
+{
+  "name": "hostile-gzip-bomb",
+  "seed": 0,
+  "split": "hostile",
+  "layout": "gzip",
+  "size": 65762,
+  "plants": [],
+  "reference_time": "2026-01-01T00:00:00+00:00",
+  "expected": [
+    {
+      "rule_id": "FWA-EXT-002",
+      "path": null,
+      "where": "image",
+      "note": "64 MiB of zeros, ~1000:1",
+      "cves": []
+    }
+  ]
+}

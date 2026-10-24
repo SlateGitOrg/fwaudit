@@ -1,0 +1,18 @@
+{
+  "name": "hostile-xz-bomb",
+  "seed": 0,
+  "split": "hostile",
+  "layout": "xz",
+  "size": 9892,
+  "plants": [],
+  "reference_time": "2026-01-01T00:00:00+00:00",
+  "expected": [
+    {
+      "rule_id": "FWA-EXT-002",
+      "path": null,
+      "where": "image",
+      "note": "64 MiB of zeros",
+      "cves": []
+    }
+  ]
+}

@@ -1,0 +1,211 @@
+{
+  "name": "dev-0023-flash-squashfs-xz",
+  "seed": 23,
+  "split": "dev",
+  "layout": "flash-squashfs-xz",
+  "size": 262144,
+  "plants": [
+    "setuid-busybox",
+    "root-empty-passwd",
+    "config-secret",
+    "private-key",
+    "dropbear-host-key",
+    "dropbear-root-password",
+    "expired-cert",
+    "sha1-cert",
+    "web-creds",
+    "ftp-anon",
+    "snmp-default",
+    "nested-config-backup",
+    "nvram-key",
+    "encrypted-blob"
+  ],
+  "reference_time": "2026-01-01T00:00:00+00:00",
+  "expected": [
+    {
+      "rule_id": "FWA-CMP-001",
+      "path": "/bin/busybox",
+      "where": "extracted",
+      "note": "busybox 1.36.1",
+      "cves": []
+    },
+    {
+      "rule_id": "FWA-CMP-002",
+      "path": "/bin/busybox",
+      "where": "extracted",
+      "note": "busybox 1.36.1",
+      "cves": [
+        "CVE-2022-48174"
+      ]
+    },
+    {
+      "rule_id": "FWA-PERM-002",
+      "path": "/bin/busybox",
+      "where": "extracted",
+      "note": "busybox installed setuid root",
+      "cves": []
+    },
+    {
+      "rule_id": "FWA-CRED-001",
+      "path": "/etc/passwd",
+      "where": "extracted",
+      "note": "root has empty passwd field",
+      "cves": []
+    },
+    {
+      "rule_id": "FWA-CRED-006",
+      "path": "/etc/config/cloud.conf",
+      "where": "extracted",
+      "note": "kv secret",
+      "cves": []
+    },
+    {
+      "rule_id": "FWA-KEY-001",
+      "path": "/etc/ssl/private/server.key",
+      "where": "extracted",
+      "note": "EC private key",
+      "cves": []
+    },
+    {
+      "rule_id": "FWA-CMP-001",
+      "path": "/usr/sbin/dropbear",
+      "where": "extracted",
+      "note": "dropbear 2016.72",
+      "cves": []
+    },
+    {
+      "rule_id": "FWA-CMP-002",
+      "path": "/usr/sbin/dropbear",
+      "where": "extracted",
+      "note": "dropbear 2016.72",
+      "cves": [
+        "CVE-2016-7406",
+        "CVE-2016-7407",
+        "CVE-2017-9078",
+        "CVE-2018-15599",
+        "CVE-2020-36254"
+      ]
+    },
+    {
+      "rule_id": "FWA-KEY-001",
+      "path": "/etc/dropbear/dropbear_rsa_host_key",
+      "where": "extracted",
+      "note": "dropbear host key",
+      "cves": []
+    },
+    {
+      "rule_id": "FWA-KEY-004",
+      "path": "/etc/dropbear/dropbear_rsa_host_key",
+      "where": "extracted",
+      "note": "RSA-1024 host key",
+      "cves": []
+    },
+    {
+      "rule_id": "FWA-SVC-005",
+      "path": "/etc/init.d/rcS",
+      "where": "extracted",
+      "note": "dropbear without -s/-g",
+      "cves": []
+    },
+    {
+      "rule_id": "FWA-KEY-006",
+      "path": "/etc/ssl/certs/device.pem",
+      "where": "extracted",
+      "note": "valid certificate inventory",
+      "cves": []
+    },
+    {
+      "rule_id": "FWA-KEY-006",
+      "path": "/etc/ssl/certs/cloud.pem",
+      "where": "extracted",
+      "note": "inventory",
+      "cves": []
+    },
+    {
+      "rule_id": "FWA-KEY-002",
+      "path": "/etc/ssl/certs/cloud.pem",
+      "where": "extracted",
+      "note": "expired 2020",
+      "cves": []
+    },
+    {
+      "rule_id": "FWA-KEY-006",
+      "path": "/etc/ssl/certs/legacy.pem",
+      "where": "extracted",
+      "note": "inventory",
+      "cves": []
+    },
+    {
+      "rule_id": "FWA-KEY-005",
+      "path": "/etc/ssl/certs/legacy.pem",
+      "where": "extracted",
+      "note": "SHA-1 signature",
+      "cves": []
+    },
+    {
+      "rule_id": "FWA-KEY-003",
+      "path": "/etc/ssl/certs/legacy.pem",
+      "where": "extracted",
+      "note": "expires in 30 days",
+      "cves": []
+    },
+    {
+      "rule_id": "FWA-SVC-002",
+      "path": "/www/.htpasswd",
+      "where": "extracted",
+      "note": "htpasswd admin/admin",
+      "cves": []
+    },
+    {
+      "rule_id": "FWA-SVC-003",
+      "path": "/etc/vsftpd.conf",
+      "where": "extracted",
+      "note": "anonymous ftp",
+      "cves": []
+    },
+    {
+      "rule_id": "FWA-SVC-004",
+      "path": "/etc/snmp/snmpd.conf",
+      "where": "extracted",
+      "note": "ro public",
+      "cves": []
+    },
+    {
+      "rule_id": "FWA-CRED-006",
+      "path": "/etc/config/admin.conf",
+      "where": "nested",
+      "note": "secret in nested tar.gz",
+      "cves": []
+    },
+    {
+      "rule_id": "FWA-CMP-001",
+      "path": "/usr/sbin/dnsmasq",
+      "where": "extracted",
+      "note": "dnsmasq 2.80",
+      "cves": []
+    },
+    {
+      "rule_id": "FWA-CMP-002",
+      "path": "/usr/sbin/dnsmasq",
+      "where": "extracted",
+      "note": "dnsmasq 2.80",
+      "cves": [
+        "CVE-2020-25681"
+      ]
+    },
+    {
+      "rule_id": "FWA-KEY-001",
+      "path": null,
+      "where": "image",
+      "note": "PEM key in raw NVRAM partition",
+      "cves": []
+    },
+    {
+      "rule_id": "FWA-EXT-006",
+      "path": null,
+      "where": "image",
+      "note": "64 KiB random partition",
+      "cves": []
+    }
+  ]
+}

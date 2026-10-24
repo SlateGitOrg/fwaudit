@@ -1,0 +1,25 @@
+{
+  "name": "hostile-tar-traversal",
+  "seed": 0,
+  "split": "hostile",
+  "layout": "tar",
+  "size": 10240,
+  "plants": [],
+  "reference_time": "2026-01-01T00:00:00+00:00",
+  "expected": [
+    {
+      "rule_id": "FWA-EXT-001",
+      "path": null,
+      "where": "extracted",
+      "note": "'..' member",
+      "cves": []
+    },
+    {
+      "rule_id": "FWA-EXT-001",
+      "path": null,
+      "where": "extracted",
+      "note": "write through symlink",
+      "cves": []
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "name": "hostile-squashfs-traversal",
+  "seed": 0,
+  "split": "hostile",
+  "layout": "squashfs",
+  "size": 4096,
+  "plants": [],
+  "reference_time": "2026-01-01T00:00:00+00:00",
+  "expected": [
+    {
+      "rule_id": "FWA-EXT-001",
+      "path": null,
+      "where": "extracted",
+      "note": "directory entry named '..' (etc/..)",
+      "cves": []
+    },
+    {
+      "rule_id": "FWA-EXT-001",
+      "path": null,
+      "where": "extracted",
+      "note": "nested '..' directory (etc/../..)",
+      "cves": []
+    },
+    {
+      "rule_id": "FWA-EXT-001",
+      "path": null,
+      "where": "extracted",
+      "note": "file below the '..' entries",
+      "cves": []
+    }
+  ]
+}
