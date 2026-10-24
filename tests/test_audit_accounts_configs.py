@@ -120,3 +120,15 @@ def test_config_check_scope(make_fs: FsFactory, config: AuditConfig) -> None:
     default = next(f for f in found if f.path == "/etc/default.conf")
     assert default.evidence["known_default"] is True
     assert "well-known default" in default.detail
+
+
+def test_json_config_secrets() -> None:
+    pretty = (
+        '{\n  "mqtt": {\n    "host": "10.0.0.5",\n    "admin_password": "Zk3abcdefgh"\n  }\n}\n'
+    )
+    creds = find_credentials(pretty)
+    assert [(c.key, c.value, c.line) for c in creds] == [("admin_password", "Zk3abcdefgh", 4)]
+    minified = '{"mqtt":{"host":"x","api_token":"Q1w2e3r4t5"}}'
+    assert [c.value for c in find_credentials(minified)] == ["Q1w2e3r4t5"]
+    assert find_credentials('{"password": {"min_length": 8}}') == []
+    assert find_credentials('"password": "${PASSWORD}"') == []

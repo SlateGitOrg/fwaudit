@@ -149,3 +149,20 @@ def test_cert_reference_time_changes_verdict(make_fs: FsFactory) -> None:
     late = AuditConfig(reference_time=datetime(2031, 1, 1, tzinfo=UTC))
     assert {f.rule_id for f in KeysCheck().run(fs, early)} == {"FWA-KEY-006"}
     assert {f.rule_id for f in KeysCheck().run(fs, late)} == {"FWA-KEY-006", "FWA-KEY-002"}
+
+
+def test_xinetd_telnet(make_fs: FsFactory, config: AuditConfig) -> None:
+    fs = make_fs({
+        "etc/xinetd.d/telnet": "service telnet\n{\n  disable = no\n  server = /usr/sbin/in.telnetd\n}\n",
+        "etc/xinetd.d/telnet-off": "service telnet\n{\n  disable = yes\n}\n",
+        "etc/xinetd.d/remote": "service rlogin { server = /usr/sbin/utelnetd }\n",
+        "etc/xinetd.d/ftp": "service ftp\n{\n server = /usr/sbin/vsftpd\n}\n",
+        "etc/xinetd.conf": "defaults\n{\n instances = 60\n}\nincludedir /etc/xinetd.d\n",
+        "etc/xinetd.d/subdir": ("dir", 0o755),
+    })  # fmt: skip
+    found = ServicesCheck().run(fs, config)
+    assert rules(found) == [
+        ("FWA-SVC-001", "/etc/xinetd.d/remote"),
+        ("FWA-SVC-001", "/etc/xinetd.d/telnet"),
+    ]
+    assert "in.telnetd" in next(f.detail for f in found if f.path == "/etc/xinetd.d/telnet")

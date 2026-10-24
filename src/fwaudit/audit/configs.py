@@ -2,8 +2,8 @@
 
 Recognised shapes (one finding per file line):
 
-* ``key = value`` / ``key: value`` where the key names a secret (password, passwd,
-  passphrase, secret, api_key, token, psk...);
+* ``key = value`` / ``key: value`` / ``"key": "value"`` (JSON, YAML) where
+  the key names a secret (password, passwd, passphrase, secret, api_key, token, psk...);
 * OpenWrt UCI ``option <secret-key> 'value'``;
 * credentials embedded in URLs (``scheme://user:pass@host``);
 * ``echo "user:pass" | chpasswd`` in shell scripts.
@@ -28,7 +28,10 @@ SECRET_WORDS = (
 )
 _KEY = rf"[A-Za-z0-9_.\-]*{SECRET_WORDS}[A-Za-z0-9_.\-]*"
 _VALUE = r"""(?P<q>["']?)(?P<val>[^"'\s#;,]+)(?P=q)"""
-KV_RE = re.compile(rf"(?i)(?:^|[\s{{,;])(?P<key>{_KEY})\s*(?:=|:)\s*{_VALUE}")
+# The key may be quoted (JSON / YAML): ``"admin_password": "s3cret"``.
+KV_RE = re.compile(
+    rf"""(?i)(?:^|[\s{{,;])(?P<kq>["']?)(?P<key>{_KEY})(?P=kq)\s*(?:=|:)\s*{_VALUE}"""
+)
 UCI_RE = re.compile(rf"(?i)^\s*option\s+(?P<key>{_KEY})\s+{_VALUE}")
 URL_RE = re.compile(r"(?i)\b[a-z][a-z0-9+.\-]*://(?P<user>[^:/@\s'\"]+):(?P<val>[^@/\s'\"]+)@")
 CHPASSWD_RE = re.compile(

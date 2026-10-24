@@ -1,7 +1,8 @@
 """Insecure network service configuration.
 
-* Telnet started from init scripts, inittab or (x)inetd (``telnetd -l /bin/sh`` is an
-  unauthenticated root shell and is escalated to CRITICAL);
+* Telnet started from init scripts, inittab, inetd or an enabled xinetd ``service``
+  block (``telnetd -l /bin/sh`` is an unauthenticated root shell and is escalated to
+  CRITICAL);
 * web credentials in BusyBox ``httpd.conf`` (``/path:user:pass``), htpasswd-style files
   (crypt, ``{SHA}`` or plaintext) and lighttpd htdigest files, checked against the
   default-credential list;
@@ -15,6 +16,7 @@ import base64
 import hashlib
 import re
 from collections.abc import Iterator
+from dataclasses import dataclass
 
 from fwaudit.audit.base import AuditConfig, mask, numbered_lines, strip_comment
 from fwaudit.audit.cryptpw import crack, parse_hash
@@ -53,6 +55,10 @@ WEB_CRED_NAMES = (".htpasswd", "htpasswd", "lighttpd.user", "lighttpd-plain.user
 SNMP_RE = re.compile(r"^\s*(?P<kind>rocommunity6?|rwcommunity6?)\s+(?P<community>\S+)", re.I)
 COM2SEC_RE = re.compile(r"^\s*com2sec6?\s+\S+\s+\S+\s+(?P<community>\S+)", re.I)
 DEFAULT_COMMUNITIES = ("public", "private")
+XINETD_GLOBS = ("/etc/xinetd.conf", "/etc/xinetd.d/*")
+XINETD_SERVICE_RE = re.compile(r"^\s*service\s+(?P<name>\S+)")
+XINETD_ATTR_RE = re.compile(r"^\s*(?P<key>\w+)\s*[+-]?=\s*(?P<value>.*?)\s*$")
+TELNET_SERVERS = ("telnetd", "in.telnetd", "utelnetd")
 
 
 def _startup_files(fs: VirtualFS) -> Iterator[VNode]:
@@ -74,12 +80,51 @@ def _active_lines(node: VNode) -> Iterator[tuple[int, str]]:
             yield n, line
 
 
+@dataclass(frozen=True)
+class XinetdService:
+    name: str
+    line: int
+    attrs: dict[str, str]
+
+
+def parse_xinetd(node: VNode) -> list[XinetdService]:
+    """Parse ``service NAME { key = value ... }`` blocks (later keys override earlier)."""
+    services: list[XinetdService] = []
+    current: tuple[str, int] | None = None
+    attrs: dict[str, str] = {}
+    inside = False
+    for n, raw in _active_lines(node):
+        line = raw
+        m = XINETD_SERVICE_RE.match(line)
+        if m is not None:
+            current, attrs, inside = (m.group("name"), n), {}, False
+            line = line[m.end() :].strip()
+            if not line:
+                continue
+        if current is None:
+            continue
+        if line.startswith("{"):
+            inside = True
+            line = line[1:].strip()
+        closing = line.endswith("}")
+        if closing:
+            line = line[:-1].strip()
+        a = XINETD_ATTR_RE.match(line) if inside and line else None
+        if a is not None:
+            attrs[a.group("key").lower()] = a.group("value")
+        if closing and inside:
+            services.append(XinetdService(current[0], current[1], attrs))
+            current, inside = None, False
+    return services
+
+
 class ServicesCheck:
     name = "services"
 
     def run(self, fs: VirtualFS, config: AuditConfig) -> list[Finding]:
         findings: list[Finding] = []
         findings += self._telnet_and_ssh(fs)
+        findings += self._xinetd(fs)
         findings += self._web_credentials(fs, config)
         findings += self._ftp(fs)
         findings += self._snmp(fs)
@@ -124,6 +169,32 @@ class ServicesCheck:
                                 evidence={"line": n, "key": f"dropbear:{n}"},
                             )
                         )
+        return out
+
+    def _xinetd(self, fs: VirtualFS) -> list[Finding]:
+        """Enabled xinetd ``service`` blocks whose name or server is telnet."""
+        out: list[Finding] = []
+        seen: set[str] = set()
+        for pattern in XINETD_GLOBS:
+            for node in fs.glob(pattern):
+                if node.kind is not EntryKind.FILE or node.path in seen:
+                    continue
+                seen.add(node.path)
+                for block in parse_xinetd(node):
+                    server = block.attrs.get("server", "").rsplit("/", 1)[-1]
+                    is_telnet = block.name == "telnet" or server in TELNET_SERVERS
+                    if not is_telnet or block.attrs.get("disable", "no").lower() == "yes":
+                        continue
+                    out.append(
+                        make_finding(
+                            "FWA-SVC-001",
+                            f"xinetd service '{block.name}' (server {server or 'builtin'}) is "
+                            f"enabled, block starting on line {block.line}",
+                            filesystem=fs.fs_id,
+                            path=node.path,
+                            evidence={"line": block.line, "unauthenticated": False},
+                        )
+                    )
         return out
 
     def _sshd(self, fs: VirtualFS) -> list[Finding]:
