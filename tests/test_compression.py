@@ -106,3 +106,27 @@ def test_budget_validation() -> None:
         b.charge_carve()
     with pytest.raises(ValueError):
         b.charge_bytes(-1, "x")
+
+
+@pytest.mark.parametrize("codec", list(Codec))
+def test_bomb_peak_memory_is_bounded_by_ratio_allowance(codec: Codec) -> None:
+    """A bomb that fits in one input chunk must not be inflated up to the stream cap."""
+    import tracemalloc
+
+    bomb = _encode(codec, b"\x00" * (48 * MiB))
+    budget = Budget(Limits(max_ratio=50, ratio_grace_bytes=1 * MiB))
+    allowance = budget.ratio_allowance(64 * 1024)
+    tracemalloc.start()
+    with pytest.raises(LimitExceededError) as info:
+        decompress(codec, bomb, budget)
+    _, peak = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
+    assert info.value.limit == "max_ratio"
+    assert peak < 4 * allowance + 2 * MiB, f"peak {peak} vs allowance {allowance}"
+
+
+def test_ratio_allowance() -> None:
+    budget = Budget(Limits(max_ratio=10, ratio_grace_bytes=100))
+    assert budget.ratio_allowance(0) == 100
+    assert budget.ratio_allowance(5) == 100
+    assert budget.ratio_allowance(50) == 500

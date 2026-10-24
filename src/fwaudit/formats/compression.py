@@ -117,7 +117,11 @@ def decompress(
                 fed += len(chunk)
             else:
                 chunk = b""
-            piece = dec.decompress(chunk, cap + 1 - len(out))
+            # Never ask for more than the ratio limit allows for the input fed so far (+1
+            # byte so that crossing it is observable). This keeps peak memory at
+            # O(max_ratio * input) instead of O(cap) when a bomb hides in one chunk.
+            allowance = min(cap, budget.ratio_allowance(fed))
+            piece = dec.decompress(chunk, allowance + 1 - len(out))
             out += piece
             if len(out) > cap:
                 limit = (

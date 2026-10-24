@@ -83,6 +83,11 @@ class Budget:
             )
         self.carves += 1
 
+    def ratio_allowance(self, consumed: int) -> int:
+        """Most output bytes that ``consumed`` input bytes may produce without tripping
+        :meth:`check_ratio`."""
+        return max(self.limits.ratio_grace_bytes, self.limits.max_ratio * max(consumed, 1))
+
     def check_ratio(self, produced: int, consumed: int, what: str) -> None:
         """Reject streams whose expansion ratio is implausible for real firmware."""
         if produced <= self.limits.ratio_grace_bytes:
