@@ -1,0 +1,303 @@
+{
+  "schema_version": 1,
+  "source": "NVD CVE API 2.0 (descriptions, CPE configurations and CVSS base scores), retrieved 2026-10-25",
+  "note": "Curated offline SUBSET for demonstration. Not exhaustive: absence of a CVE here says nothing about a component's safety.",
+  "entries": [
+    {
+      "id": "CVE-2014-0160",
+      "component": "openssl",
+      "cvss": 7.5,
+      "cvss_version": "3.1",
+      "summary": "Heartbleed: TLS/DTLS heartbeat buffer over-read leaks process memory",
+      "ranges": [
+        {
+          "introduced": "1.0.1",
+          "fixed": "1.0.1g"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2014-0224",
+      "component": "openssl",
+      "cvss": 7.4,
+      "cvss_version": "3.1",
+      "summary": "CCS Injection: early ChangeCipherSpec enables MITM session hijack",
+      "ranges": [
+        {
+          "introduced": "0",
+          "fixed": "0.9.8za"
+        },
+        {
+          "introduced": "1.0.0",
+          "fixed": "1.0.0m"
+        },
+        {
+          "introduced": "1.0.1",
+          "fixed": "1.0.1h"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2016-0800",
+      "component": "openssl",
+      "cvss": 5.9,
+      "cvss_version": "3.0",
+      "summary": "DROWN: SSLv2 Bleichenbacher padding oracle decrypts TLS sessions",
+      "ranges": [
+        {
+          "introduced": "0",
+          "fixed": "1.0.1s"
+        },
+        {
+          "introduced": "1.0.2",
+          "fixed": "1.0.2g"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2016-2107",
+      "component": "openssl",
+      "cvss": 5.9,
+      "cvss_version": "3.1",
+      "summary": "AES-NI CBC padding oracle (incorrect fix for Lucky 13)",
+      "ranges": [
+        {
+          "introduced": "0",
+          "fixed": "1.0.1t"
+        },
+        {
+          "introduced": "1.0.2",
+          "fixed": "1.0.2h"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2016-2108",
+      "component": "openssl",
+      "cvss": 9.8,
+      "cvss_version": "3.0",
+      "summary": "ASN.1 encoder negative-zero memory corruption",
+      "ranges": [
+        {
+          "introduced": "0",
+          "fixed": "1.0.1o"
+        },
+        {
+          "introduced": "1.0.2",
+          "fixed": "1.0.2c"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2022-0778",
+      "component": "openssl",
+      "cvss": 7.5,
+      "cvss_version": "3.1",
+      "summary": "BN_mod_sqrt infinite loop when parsing crafted certificates (DoS)",
+      "ranges": [
+        {
+          "introduced": "1.0.2",
+          "fixed": "1.0.2zd"
+        },
+        {
+          "introduced": "1.1.0",
+          "fixed": "1.1.1n"
+        },
+        {
+          "introduced": "3.0.0",
+          "fixed": "3.0.2"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2023-0286",
+      "component": "openssl",
+      "cvss": 7.4,
+      "cvss_version": "3.1",
+      "summary": "X.400 address type confusion in GENERAL_NAME_cmp",
+      "ranges": [
+        {
+          "introduced": "1.0.2",
+          "fixed": "1.0.2zg"
+        },
+        {
+          "introduced": "1.1.1",
+          "fixed": "1.1.1t"
+        },
+        {
+          "introduced": "3.0.0",
+          "fixed": "3.0.8"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2016-2147",
+      "component": "busybox",
+      "cvss": 7.5,
+      "cvss_version": "3.1",
+      "summary": "udhcpc integer overflow on malformed RFC1035 domain name",
+      "ranges": [
+        {
+          "introduced": "0",
+          "fixed": "1.25.0"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2016-2148",
+      "component": "busybox",
+      "cvss": 9.8,
+      "cvss_version": "3.1",
+      "summary": "udhcpc heap overflow in OPTION_6RD parsing",
+      "ranges": [
+        {
+          "introduced": "0",
+          "fixed": "1.25.0"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2017-16544",
+      "component": "busybox",
+      "cvss": 8.8,
+      "cvss_version": "3.1",
+      "summary": "ash tab completion does not sanitise filenames (terminal escape injection)",
+      "ranges": [
+        {
+          "introduced": "0",
+          "last_affected": "1.27.2"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2021-42374",
+      "component": "busybox",
+      "cvss": 5.3,
+      "cvss_version": "3.1",
+      "summary": "unlzma out-of-bounds heap read on crafted LZMA input",
+      "ranges": [
+        {
+          "introduced": "1.27.0",
+          "last_affected": "1.33.1"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2022-48174",
+      "component": "busybox",
+      "cvss": 9.8,
+      "cvss_version": "3.1",
+      "summary": "ash stack overflow leading to code execution",
+      "ranges": [
+        {
+          "introduced": "0",
+          "fixed": "1.35.0"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2016-7406",
+      "component": "dropbear",
+      "cvss": 9.8,
+      "cvss_version": "3.0",
+      "summary": "format string in username/host argument",
+      "ranges": [
+        {
+          "introduced": "0",
+          "fixed": "2016.74"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2016-7407",
+      "component": "dropbear",
+      "cvss": 9.8,
+      "cvss_version": "3.0",
+      "summary": "dropbearconvert code execution via crafted OpenSSH key file",
+      "ranges": [
+        {
+          "introduced": "0",
+          "fixed": "2016.74"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2017-9078",
+      "component": "dropbear",
+      "cvss": 8.8,
+      "cvss_version": "3.1",
+      "summary": "double free in TCP listener cleanup with -a (post-auth root RCE)",
+      "ranges": [
+        {
+          "introduced": "0",
+          "fixed": "2017.75"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2018-15599",
+      "component": "dropbear",
+      "cvss": 5.3,
+      "cvss_version": "3.0",
+      "summary": "user enumeration via SSH_MSG_USERAUTH handling",
+      "ranges": [
+        {
+          "introduced": "0",
+          "last_affected": "2018.76"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2020-36254",
+      "component": "dropbear",
+      "cvss": 8.1,
+      "cvss_version": "3.1",
+      "summary": "scp mishandles '.' or empty filename (CVE-2018-20685 analogue)",
+      "ranges": [
+        {
+          "introduced": "0",
+          "fixed": "2020.79"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2017-14491",
+      "component": "dnsmasq",
+      "cvss": 9.8,
+      "cvss_version": "3.1",
+      "summary": "heap overflow via crafted DNS response",
+      "ranges": [
+        {
+          "introduced": "0",
+          "fixed": "2.78"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2017-14492",
+      "component": "dnsmasq",
+      "cvss": 9.8,
+      "cvss_version": "3.0",
+      "summary": "heap overflow via crafted IPv6 router advertisement",
+      "ranges": [
+        {
+          "introduced": "0",
+          "fixed": "2.78"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2020-25681",
+      "component": "dnsmasq",
+      "cvss": 8.1,
+      "cvss_version": "3.1",
+      "summary": "DNSpooq: heap overflow sorting RRSets for DNSSEC validation",
+      "ranges": [
+        {
+          "introduced": "0",
+          "fixed": "2.83"
+        }
+      ]
+    }
+  ]
+}
