@@ -81,6 +81,7 @@ Library use:
 
 ```python
 from fwaudit import audit_file
+
 result = audit_file("firmware.bin")
 for f in result.findings:
     print(f.severity.name, f.rule_id, f.path, f.detail)
