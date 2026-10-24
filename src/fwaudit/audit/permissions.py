@@ -29,29 +29,44 @@ class PermissionsCheck:
                 special = node.is_setuid or node.is_setgid
                 if special and node.world_writable:
                     bits = "setuid" if node.is_setuid else "setgid"
-                    out.append(make_finding(
-                        "FWA-PERM-001",
-                        f"{bits} file is world-writable ({mode}, owner uid {node.uid})",
-                        filesystem=fs.fs_id, path=node.path,
-                        evidence={"mode": oct(node.mode), "uid": node.uid},
-                    ))  # fmt: skip
+                    out.append(
+                        make_finding(
+                            "FWA-PERM-001",
+                            f"{bits} file is world-writable ({mode}, owner uid {node.uid})",
+                            filesystem=fs.fs_id,
+                            path=node.path,
+                            evidence={"mode": oct(node.mode), "uid": node.uid},
+                        )
+                    )
                     continue
                 if node.is_setuid and node.uid == 0:
-                    out.append(make_finding(
-                        "FWA-PERM-002", f"setuid-root executable ({mode})",
-                        filesystem=fs.fs_id, path=node.path,
-                        evidence={"mode": oct(node.mode)},
-                    ))  # fmt: skip
+                    out.append(
+                        make_finding(
+                            "FWA-PERM-002",
+                            f"setuid-root executable ({mode})",
+                            filesystem=fs.fs_id,
+                            path=node.path,
+                            evidence={"mode": oct(node.mode)},
+                        )
+                    )
                 if node.world_writable and _in_system_dir(node.path):
-                    out.append(make_finding(
-                        "FWA-PERM-003", f"world-writable file in a system directory ({mode})",
-                        filesystem=fs.fs_id, path=node.path,
-                        evidence={"mode": oct(node.mode)},
-                    ))  # fmt: skip
+                    out.append(
+                        make_finding(
+                            "FWA-PERM-003",
+                            f"world-writable file in a system directory ({mode})",
+                            filesystem=fs.fs_id,
+                            path=node.path,
+                            evidence={"mode": oct(node.mode)},
+                        )
+                    )
             elif node.kind is EntryKind.DIR and node.world_writable and not node.sticky:
-                out.append(make_finding(
-                    "FWA-PERM-004", f"world-writable directory without sticky bit ({mode})",
-                    filesystem=fs.fs_id, path=node.path,
-                    evidence={"mode": oct(node.mode)},
-                ))  # fmt: skip
+                out.append(
+                    make_finding(
+                        "FWA-PERM-004",
+                        f"world-writable directory without sticky bit ({mode})",
+                        filesystem=fs.fs_id,
+                        path=node.path,
+                        evidence={"mode": oct(node.mode)},
+                    )
+                )
         return out

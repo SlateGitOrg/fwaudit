@@ -42,12 +42,15 @@ ignore = [
     "S324",    # md5/sha1 are part of the crypt algorithms we must implement
     "TRY003",  # descriptive exception messages are intentional
     "S603", "S607",
+    "PLR0917", # positional-heavy private helpers are clearer than ad-hoc dataclasses here
+    "TRY400",  # CLI errors are reported without tracebacks on purpose
 ]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S101", "S105", "S106", "S108", "PLR2004", "PLC0415", "PT011"]
 "scripts/**" = ["S101", "T201"]
-"src/fwaudit/synth/**" = ["S105", "S106"]
+"src/fwaudit/synth/**" = ["S105", "S106", "S303"]
+"src/fwaudit/audit/**" = ["S105"]  # variables named "password" are the subject matter
 
 [tool.mypy]
 strict = true

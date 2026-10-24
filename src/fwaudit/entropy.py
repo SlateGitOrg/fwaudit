@@ -54,7 +54,7 @@ class EntropyMap:
         buckets = np.array_split(vals, min(width, len(vals)))
         chars = []
         for b in buckets:
-            level = int(round(float(b.max()) / 8.0 * (len(SPARK) - 1)))
+            level = round(float(b.max()) / 8.0 * (len(SPARK) - 1))
             chars.append(SPARK[max(0, min(level, len(SPARK) - 1))])
         return "".join(chars)
 

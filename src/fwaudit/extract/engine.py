@@ -157,7 +157,9 @@ class Extractor:
             evidence={"format": hit.name, "key": hit.offset},
         )
 
-    def _record_gaps(self, data: bytes, node: ExtractionNode, claimed: list[tuple[int, int]]) -> None:
+    def _record_gaps(
+        self, data: bytes, node: ExtractionNode, claimed: list[tuple[int, int]]
+    ) -> None:
         pos = 0
         gaps: list[tuple[int, int]] = []
         for start, end in claimed:
@@ -293,7 +295,10 @@ class Extractor:
         else:
             s = squashfs.parse(view, self.budget, what=what)
             entries, consumed = s.entries, s.consumed
-            meta = {"compression": s.superblock.compression_name, "block_size": s.superblock.block_size}
+            meta = {
+                "compression": s.superblock.compression_name,
+                "block_size": s.superblock.block_size,
+            }
         node = self._node(hit.name, hit.offset, consumed, parent.depth + 1, parent)
         for k, v in meta.items():
             if isinstance(v, (str, int)):
@@ -332,7 +337,8 @@ class Extractor:
             hit = match_at_start(f.data)
             if hit is None:
                 continue
-            child = self._node("file", 0, len(f.data), node.depth + 1, node,
-                               node_id=f"{node.node_id}:{f.path}")  # fmt: skip
+            child = self._node(
+                "file", 0, len(f.data), node.depth + 1, node, node_id=f"{node.node_id}:{f.path}"
+            )
             child.meta["path"] = f.path
             self._explore(f.data, child)

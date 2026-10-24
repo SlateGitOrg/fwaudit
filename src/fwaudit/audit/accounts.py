@@ -88,12 +88,15 @@ class AccountsCheck:
 
         for u in users:
             if u.uid == 0 and u.name != "root":
-                findings.append(make_finding(
-                    "FWA-CRED-005",
-                    f"account '{u.name}' has UID 0 (root privileges)",
-                    filesystem=fs.fs_id, path=passwd_path,
-                    evidence={"user": u.name, "line": u.line, "key": u.name},
-                ))  # fmt: skip
+                findings.append(
+                    make_finding(
+                        "FWA-CRED-005",
+                        f"account '{u.name}' has UID 0 (root privileges)",
+                        filesystem=fs.fs_id,
+                        path=passwd_path,
+                        evidence={"user": u.name, "line": u.line, "key": u.name},
+                    )
+                )
             if u.password == "x":
                 continue
             if u.password == "":
@@ -104,12 +107,20 @@ class AccountsCheck:
             if _is_locked(u.password):
                 continue
             parsed = parse_hash(u.password)
-            findings.append(make_finding(
-                "FWA-CRED-002",
-                f"password hash for '{u.name}' is stored in {passwd_path}",
-                filesystem=fs.fs_id, path=passwd_path,
-                evidence={"user": u.name, "scheme": parsed.scheme, "line": u.line, "key": u.name},
-            ))  # fmt: skip
+            findings.append(
+                make_finding(
+                    "FWA-CRED-002",
+                    f"password hash for '{u.name}' is stored in {passwd_path}",
+                    filesystem=fs.fs_id,
+                    path=passwd_path,
+                    evidence={
+                        "user": u.name,
+                        "scheme": parsed.scheme,
+                        "line": u.line,
+                        "key": u.name,
+                    },
+                )
+            )
             findings.extend(self._hash_findings(fs, passwd_path, u.name, u.line, parsed, config))
 
         for s in shadows:
@@ -128,12 +139,15 @@ class AccountsCheck:
         if shadow_path is not None:
             node = fs.get(shadow_path)
             if node is not None and node.world_readable:
-                findings.append(make_finding(
-                    "FWA-CRED-007",
-                    f"{shadow_path} has mode {node.mode_string()} (readable by every user)",
-                    filesystem=fs.fs_id, path=shadow_path,
-                    evidence={"mode": oct(node.mode)},
-                ))  # fmt: skip
+                findings.append(
+                    make_finding(
+                        "FWA-CRED-007",
+                        f"{shadow_path} has mode {node.mode_string()} (readable by every user)",
+                        filesystem=fs.fs_id,
+                        path=shadow_path,
+                        evidence={"mode": oct(node.mode)},
+                    )
+                )
         return findings
 
     @staticmethod
@@ -165,20 +179,31 @@ class AccountsCheck:
     ) -> list[Finding]:
         out: list[Finding] = []
         if parsed.weak:
-            out.append(make_finding(
-                "FWA-CRED-003",
-                f"password for '{user}' uses {parsed.scheme} crypt",
-                filesystem=fs.fs_id, path=path,
-                evidence={"user": user, "scheme": parsed.scheme, "line": line, "key": user},
-            ))  # fmt: skip
+            out.append(
+                make_finding(
+                    "FWA-CRED-003",
+                    f"password for '{user}' uses {parsed.scheme} crypt",
+                    filesystem=fs.fs_id,
+                    path=path,
+                    evidence={"user": user, "scheme": parsed.scheme, "line": line, "key": user},
+                )
+            )
         guess = crack(parsed, config.guesses_for(user))
         if guess is not None:
-            out.append(make_finding(
-                "FWA-CRED-004",
-                f"password for '{user}' is the default/guessable value "
-                f"{mask(guess, config.show_secrets)}",
-                filesystem=fs.fs_id, path=path,
-                evidence={"user": user, "scheme": parsed.scheme, "line": line,
-                          "password": mask(guess, config.show_secrets), "key": user},
-            ))  # fmt: skip
+            out.append(
+                make_finding(
+                    "FWA-CRED-004",
+                    f"password for '{user}' is the default/guessable value "
+                    f"{mask(guess, config.show_secrets)}",
+                    filesystem=fs.fs_id,
+                    path=path,
+                    evidence={
+                        "user": user,
+                        "scheme": parsed.scheme,
+                        "line": line,
+                        "password": mask(guess, config.show_secrets),
+                        "key": user,
+                    },
+                )
+            )
         return out

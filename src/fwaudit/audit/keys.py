@@ -20,6 +20,7 @@ from dataclasses import dataclass
 from datetime import timedelta
 
 from cryptography import x509
+from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import dsa, ec, ed448, ed25519, rsa
 from cryptography.x509.oid import NameOID
@@ -46,9 +47,12 @@ WEAK_BITS = 2048
 WEAK_SIG_HASHES = {"md5", "sha1"}
 
 PublicKey = (
-    rsa.RSAPublicKey | dsa.DSAPublicKey | ec.EllipticCurvePublicKey
-    | ed25519.Ed25519PublicKey | ed448.Ed448PublicKey
-)  # fmt: skip
+    rsa.RSAPublicKey
+    | dsa.DSAPublicKey
+    | ec.EllipticCurvePublicKey
+    | ed25519.Ed25519PublicKey
+    | ed448.Ed448PublicKey
+)
 
 
 @dataclass(frozen=True)
@@ -95,12 +99,10 @@ def _openssh_encrypted(body: bytes) -> bool:
 def _load_private(label: bytes, pem: bytes) -> KeyInfo | None:
     try:
         if label == b"OPENSSH PRIVATE KEY":
-            key = serialization.load_ssh_private_key(pem, password=None)
-        else:
-            key = serialization.load_pem_private_key(pem, password=None)
-    except (ValueError, TypeError, NotImplementedError):
+            return describe_public(serialization.load_ssh_private_key(pem, None).public_key())
+        return describe_public(serialization.load_pem_private_key(pem, None).public_key())
+    except (ValueError, TypeError, NotImplementedError, UnsupportedAlgorithm):
         return None
-    return describe_public(key.public_key())
 
 
 def _ssh_strings(blob: bytes, count: int) -> list[bytes]:
@@ -188,12 +190,18 @@ class KeyAnalyzer:
         if info is None:
             return []
         loc = _Loc(filesystem, path, None, 0, 0)
-        out = [loc.finding(
-            "FWA-KEY-001",
-            f"dropbear host private key ({info.algorithm}, {info.bits} bits) shipped in the image",
-            {"format": "dropbear", "algorithm": info.algorithm, "bits": info.bits,
-             "encrypted": False},
-        )]  # fmt: skip
+        out = [
+            loc.finding(
+                "FWA-KEY-001",
+                f"dropbear host private key ({info.algorithm}, {info.bits} bits) in the image",
+                {
+                    "format": "dropbear",
+                    "algorithm": info.algorithm,
+                    "bits": info.bits,
+                    "encrypted": False,
+                },
+            )
+        ]
         out += self._weak_size(info, loc, "dropbear host key")
         return out
 
@@ -217,20 +225,27 @@ class KeyAnalyzer:
         }
         detail = f"{label.decode()} ({'passphrase-protected' if encrypted else 'unencrypted'}"
         detail += f", {info.algorithm} {info.bits} bits)" if info else ")"
-        out = [loc.finding(
-            "FWA-KEY-001", detail, evidence,
-            severity=Severity.MEDIUM if encrypted else None,
-        )]  # fmt: skip
+        out = [
+            loc.finding(
+                "FWA-KEY-001",
+                detail,
+                evidence,
+                severity=Severity.MEDIUM if encrypted else None,
+            )
+        ]
         if info is not None:
             out += self._weak_size(info, loc, "private key")
         return out
 
     def _weak_size(self, info: KeyInfo, loc: _Loc, what: str) -> list[Finding]:
         if info.algorithm in ("rsa", "dsa") and info.bits is not None and info.bits < WEAK_BITS:
-            return [loc.finding(
-                "FWA-KEY-004", f"{what} is {info.algorithm.upper()}-{info.bits}",
-                {"algorithm": info.algorithm, "bits": info.bits, "subject": what},
-            )]  # fmt: skip
+            return [
+                loc.finding(
+                    "FWA-KEY-004",
+                    f"{what} is {info.algorithm.upper()}-{info.bits}",
+                    {"algorithm": info.algorithm, "bits": info.bits, "subject": what},
+                )
+            ]
         return []
 
     def _certificate(self, cert: x509.Certificate, loc: _Loc) -> list[Finding]:
@@ -252,29 +267,39 @@ class KeyAnalyzer:
             "signature_hash": sig_hash,
             "serial": format(cert.serial_number, "x"),
         }
-        out = [loc.finding(
-            "FWA-KEY-006",
-            f"certificate CN={subject} issued by CN={issuer}, valid until {not_after.date()}",
-            evidence,
-        )]  # fmt: skip
+        out = [
+            loc.finding(
+                "FWA-KEY-006",
+                f"certificate CN={subject} issued by CN={issuer}, valid until {not_after.date()}",
+                evidence,
+            )
+        ]
         if not_after < ref:
-            out.append(loc.finding(
-                "FWA-KEY-002",
-                f"certificate CN={subject} expired on {not_after.date()} "
-                f"({-days_left} days before the reference time)",
-                {"subject": subject, "not_after": not_after.isoformat()},
-            ))  # fmt: skip
+            out.append(
+                loc.finding(
+                    "FWA-KEY-002",
+                    f"certificate CN={subject} expired on {not_after.date()} "
+                    f"({-days_left} days before the reference time)",
+                    {"subject": subject, "not_after": not_after.isoformat()},
+                )
+            )
         elif not_after - ref <= timedelta(days=self.config.expiry_warning_days):
-            out.append(loc.finding(
-                "FWA-KEY-003",
-                f"certificate CN={subject} expires on {not_after.date()} ({days_left} days left)",
-                {"subject": subject, "not_after": not_after.isoformat()},
-            ))  # fmt: skip
+            out.append(
+                loc.finding(
+                    "FWA-KEY-003",
+                    f"certificate CN={subject} expires on {not_after.date()} "
+                    f"({days_left} days left)",
+                    {"subject": subject, "not_after": not_after.isoformat()},
+                )
+            )
         if sig_hash in WEAK_SIG_HASHES:
-            out.append(loc.finding(
-                "FWA-KEY-005", f"certificate CN={subject} is signed with {sig_hash.upper()}",
-                {"subject": subject, "signature_hash": sig_hash},
-            ))  # fmt: skip
+            out.append(
+                loc.finding(
+                    "FWA-KEY-005",
+                    f"certificate CN={subject} is signed with {sig_hash.upper()}",
+                    {"subject": subject, "signature_hash": sig_hash},
+                )
+            )
         out += self._weak_size(info, loc, f"certificate CN={subject} key")
         return out
 

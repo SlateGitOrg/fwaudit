@@ -38,8 +38,10 @@ def header_checksum_ok(block: bytes) -> bool:
     except ValueError:
         return False
     unsigned = sum(block[:148]) + 8 * 32 + sum(block[156:BLOCK])
-    signed = sum((b - 256 if b > 127 else b) for b in block[:148]) + 256 + sum(
-        (b - 256 if b > 127 else b) for b in block[156:BLOCK]
+    signed = (
+        sum((b - 256 if b > 127 else b) for b in block[:148])
+        + 256
+        + sum((b - 256 if b > 127 else b) for b in block[156:BLOCK])
     )
     return stored in (unsigned, signed)
 
@@ -71,7 +73,7 @@ def parse(data: bytes | memoryview, budget: Budget, *, what: str = "tar") -> Tar
     entries: list[ArchiveEntry] = []
     complete = True
     try:
-        tf = tarfile.open(fileobj=fileobj, mode="r:", errorlevel=1)
+        tf = tarfile.open(fileobj=fileobj, mode="r:", errorlevel=1)  # noqa: SIM115 - closed below
     except tarfile.TarError as exc:
         raise FormatError(f"tar: {exc}") from exc
     max_file = budget.limits.max_file_bytes
@@ -96,9 +98,10 @@ def parse(data: bytes | memoryview, budget: Budget, *, what: str = "tar") -> Tar
                 content, truncated = _read_member(tf, member, max_file)
                 budget.charge_bytes(len(content), what)
                 entries.append(
-                    ArchiveEntry(name, kind, mode, member.uid, member.gid, content,
-                                 truncated=truncated)
-                )  # fmt: skip
+                    ArchiveEntry(
+                        name, kind, mode, member.uid, member.gid, content, truncated=truncated
+                    )
+                )
                 if len(content) < min(member.size, max_file):
                     complete = False
                     break

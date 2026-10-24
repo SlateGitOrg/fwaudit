@@ -23,28 +23,89 @@ from fwaudit.audit.base import AuditConfig, mask, numbered_lines, strip_comment,
 from fwaudit.model import Finding, make_finding
 from fwaudit.vfs import VirtualFS
 
-SECRET_WORDS = r"(?:password|passwd|passphrase|passwort|pwd|secret|api[_-]?key|auth[_-]?key|token|psk)"
+SECRET_WORDS = (
+    r"(?:password|passwd|passphrase|passwort|pwd|secret|api[_-]?key|auth[_-]?key|token|psk)"
+)
 _KEY = rf"[A-Za-z0-9_.\-]*{SECRET_WORDS}[A-Za-z0-9_.\-]*"
 _VALUE = r"""(?P<q>["']?)(?P<val>[^"'\s#;,]+)(?P=q)"""
 KV_RE = re.compile(rf"(?i)(?:^|[\s{{,;])(?P<key>{_KEY})\s*(?:=|:)\s*{_VALUE}")
 UCI_RE = re.compile(rf"(?i)^\s*option\s+(?P<key>{_KEY})\s+{_VALUE}")
 URL_RE = re.compile(r"(?i)\b[a-z][a-z0-9+.\-]*://(?P<user>[^:/@\s'\"]+):(?P<val>[^@/\s'\"]+)@")
-CHPASSWD_RE = re.compile(r"""(?i)echo\s+(?:-e\s+)?(?P<q>["']?)(?P<user>[\w.\-]+):(?P<val>[^"'\s|]+)(?P=q)\s*\|\s*chpasswd""")
+CHPASSWD_RE = re.compile(
+    r"""(?i)echo\s+(?:-e\s+)?(?P<q>["']?)(?P<user>[\w.\-]+):(?P<val>[^"'\s|]+)(?P=q)\s*\|\s*chpasswd"""
+)
 POLICY_TOKENS = {
-    "file", "path", "len", "length", "min", "max", "minlen", "maxlen", "timeout", "age",
-    "retry", "retries", "count", "size", "policy", "prompt", "type", "hash", "format",
-    "dir", "cmd", "url", "expire", "expires", "lifetime", "required", "reset", "enable",
-    "enabled", "history", "complexity", "strength", "change", "warn",
-}  # fmt: skip
+    "file",
+    "path",
+    "len",
+    "length",
+    "min",
+    "max",
+    "minlen",
+    "maxlen",
+    "timeout",
+    "age",
+    "retry",
+    "retries",
+    "count",
+    "size",
+    "policy",
+    "prompt",
+    "type",
+    "hash",
+    "format",
+    "dir",
+    "cmd",
+    "url",
+    "expire",
+    "expires",
+    "lifetime",
+    "required",
+    "reset",
+    "enable",
+    "enabled",
+    "history",
+    "complexity",
+    "strength",
+    "change",
+    "warn",
+}
 _TOKEN_RE = re.compile(r"[A-Z]?[a-z]+|[A-Z]+(?![a-z])|\d+")
 NON_SECRETS = {
-    "", "x", "*", "none", "null", "nil", "true", "false", "yes", "no", "on", "off",
-    "required", "optional", "disabled", "enabled", "empty", "unset", "default",
-}  # fmt: skip
+    "",
+    "x",
+    "*",
+    "none",
+    "null",
+    "nil",
+    "true",
+    "false",
+    "yes",
+    "no",
+    "on",
+    "off",
+    "required",
+    "optional",
+    "disabled",
+    "enabled",
+    "empty",
+    "unset",
+    "default",
+}
 SKIP_BASENAMES = {
-    "passwd", "shadow", "group", "gshadow", "httpd.conf", ".htpasswd", "htpasswd",
-    "lighttpd.user", "lighttpd-plain.user", "snmpd.conf", "vsftpd.conf", "sshd_config",
-}  # fmt: skip
+    "passwd",
+    "shadow",
+    "group",
+    "gshadow",
+    "httpd.conf",
+    ".htpasswd",
+    "htpasswd",
+    "lighttpd.user",
+    "lighttpd-plain.user",
+    "snmpd.conf",
+    "vsftpd.conf",
+    "sshd_config",
+}
 SCAN_PREFIXES = ("/etc", "/usr", "/www", "/var", "/opt", "/home", "/root", "/srv", "/data")
 MAX_CONFIG_BYTES = 256 * 1024
 
@@ -119,11 +180,20 @@ class ConfigSecretsCheck:
                 )
                 if default:
                     detail += " (a well-known default password)"
-                findings.append(make_finding(
-                    "FWA-CRED-006", detail, filesystem=fs.fs_id, path=path,
-                    evidence={"key": f"{cred.line}:{cred.key}", "name": cred.key,
-                              "line": cred.line, "form": cred.form,
-                              "value": mask(cred.value, config.show_secrets),
-                              "known_default": default},
-                ))  # fmt: skip
+                findings.append(
+                    make_finding(
+                        "FWA-CRED-006",
+                        detail,
+                        filesystem=fs.fs_id,
+                        path=path,
+                        evidence={
+                            "key": f"{cred.line}:{cred.key}",
+                            "name": cred.key,
+                            "line": cred.line,
+                            "form": cred.form,
+                            "value": mask(cred.value, config.show_secrets),
+                            "known_default": default,
+                        },
+                    )
+                )
         return findings

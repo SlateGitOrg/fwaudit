@@ -90,7 +90,9 @@ class _Node:
 
 
 def _normalise(entries: list[ArchiveEntry]) -> dict[str, _Node]:
-    nodes: dict[str, _Node] = {"/": _Node("/", ArchiveEntry(b"/", EntryKind.DIR, 0o755), children=[])}
+    nodes: dict[str, _Node] = {
+        "/": _Node("/", ArchiveEntry(b"/", EntryKind.DIR, 0o755), children=[])
+    }
     for e in entries:
         path = "/" + e.name.decode().strip("/")
         if path == "/":
@@ -100,8 +102,9 @@ def _normalise(entries: list[ArchiveEntry]) -> dict[str, _Node]:
         for i in range(1, len(parts)):
             parent = "/" + "/".join(parts[:i])
             if parent not in nodes:
-                nodes[parent] = _Node(parent, ArchiveEntry(parent.encode(), EntryKind.DIR, 0o755),
-                                      children=[])  # fmt: skip
+                nodes[parent] = _Node(
+                    parent, ArchiveEntry(parent.encode(), EntryKind.DIR, 0o755), children=[]
+                )
         if e.kind is EntryKind.HARDLINK:
             raise ValueError("squashfs writer does not support hard links")
         existing = nodes.get(path)
@@ -166,9 +169,14 @@ def build(
     def header(node: _Node, inode_type: int) -> bytes:
         e = node.entry
         return struct.pack(
-            "<HHHHII", inode_type, e.mode & 0o7777, id_index[e.uid], id_index[e.gid],
-            mkfs_time, node.inode_number,
-        )  # fmt: skip
+            "<HHHHII",
+            inode_type,
+            e.mode & 0o7777,
+            id_index[e.uid],
+            id_index[e.gid],
+            mkfs_time,
+            node.inode_number,
+        )
 
     def write_leaf(node: _Node) -> None:
         e = node.entry
@@ -215,10 +223,16 @@ def build(
             for cp in group:
                 name = cp.rsplit("/", 1)[1].encode()
                 child = nodes[cp]
-                listing += struct.pack(
-                    "<HhHH", refs[cp][1], child.inode_number - base,
-                    BASIC_TYPE[child.entry.kind], len(name) - 1,
-                ) + name  # fmt: skip
+                listing += (
+                    struct.pack(
+                        "<HhHH",
+                        refs[cp][1],
+                        child.inode_number - base,
+                        BASIC_TYPE[child.entry.kind],
+                        len(name) - 1,
+                    )
+                    + name
+                )
         if len(listing) + 3 > 0xFFFF:
             raise ValueError(f"directory {node.path} too large for a basic inode")
         dir_block, dir_offset = dirs.position()
@@ -269,4 +283,3 @@ def build(
     image[:96] = superblock
     image += b"\x00" * (-len(image) % 4096)
     return bytes(image)
-

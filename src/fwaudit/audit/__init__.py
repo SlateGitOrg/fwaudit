@@ -43,7 +43,7 @@ def run_checks(fs: VirtualFS, config: AuditConfig, checks: list[Check]) -> Check
     for check in checks:
         try:
             run.findings.extend(check.run(fs, config))
-        except Exception as exc:  # noqa: BLE001 - one broken check must not abort the audit
+        except Exception as exc:  # one broken check must not abort the audit
             log.exception("check %s failed on %s", check.name, fs.fs_id)
             run.errors.append(f"{check.name} on {fs.fs_id}: {type(exc).__name__}: {exc}")
     return run

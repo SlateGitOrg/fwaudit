@@ -33,8 +33,13 @@ from fwaudit.formats.entries import ArchiveEntry, EntryKind
 from fwaudit.synth import pki, squashfs_writer
 
 REFERENCE_TIME = datetime(2026, 1, 1, tzinfo=UTC)
-LAYOUTS = ("uimage-multi-cpio", "uimage-lzma-cpio", "flash-squashfs-gzip", "flash-squashfs-xz",
-           "tar-xz-update")  # fmt: skip
+LAYOUTS = (
+    "uimage-multi-cpio",
+    "uimage-lzma-cpio",
+    "flash-squashfs-gzip",
+    "flash-squashfs-xz",
+    "tar-xz-update",
+)
 ERASE_BLOCK = 0x10000
 
 # component -> version -> CVE ids affected (hand-derived from the NVD ranges)
@@ -46,15 +51,25 @@ COMPONENT_VERSIONS: dict[str, dict[str, tuple[str, ...]]] = {
         "1.36.1": (),
     },
     "openssl": {
-        "1.0.1f": ("CVE-2014-0160", "CVE-2014-0224", "CVE-2016-0800", "CVE-2016-2107",
-                   "CVE-2016-2108"),
+        "1.0.1f": (
+            "CVE-2014-0160",
+            "CVE-2014-0224",
+            "CVE-2016-0800",
+            "CVE-2016-2107",
+            "CVE-2016-2108",
+        ),
         "1.0.2k": ("CVE-2022-0778", "CVE-2023-0286"),
         "1.1.1k": ("CVE-2022-0778", "CVE-2023-0286"),
         "3.0.13": (),
     },
     "dropbear": {
-        "2016.72": ("CVE-2016-7406", "CVE-2016-7407", "CVE-2017-9078", "CVE-2018-15599",
-                    "CVE-2020-36254"),
+        "2016.72": (
+            "CVE-2016-7406",
+            "CVE-2016-7407",
+            "CVE-2017-9078",
+            "CVE-2018-15599",
+            "CVE-2020-36254",
+        ),
         "2018.76": ("CVE-2018-15599", "CVE-2020-36254"),
         "2022.83": (),
     },
@@ -63,15 +78,31 @@ COMPONENT_VERSIONS: dict[str, dict[str, tuple[str, ...]]] = {
         "2.80": ("CVE-2020-25681",),
         "2.89": (),
     },
-}  # fmt: skip
+}
 _VERSION_STRINGS = {
     "busybox": "BusyBox v{v} (2019-06-01 08:00:00 UTC) multi-call binary.",
     "openssl": "OpenSSL {v}  11 Feb 2021",
     "dropbear": "SSH-2.0-dropbear_{v}",
     "dnsmasq": "dnsmasq-{v}",
 }
-_KERNEL_WORDS = (b"sched", b"irq", b"mtd", b"spi", b"nand", b"eth0", b"probe", b"init", b"usb",
-                 b"gpio", b"clk", b"regulator", b"wdt", b"rtc", b"uart", b"dma")  # fmt: skip
+_KERNEL_WORDS = (
+    b"sched",
+    b"irq",
+    b"mtd",
+    b"spi",
+    b"nand",
+    b"eth0",
+    b"probe",
+    b"init",
+    b"usb",
+    b"gpio",
+    b"clk",
+    b"regulator",
+    b"wdt",
+    b"rtc",
+    b"uart",
+    b"dma",
+)
 
 
 @dataclass(frozen=True)
@@ -90,8 +121,13 @@ class Expected:
     cves: tuple[str, ...] = ()
 
     def to_json(self) -> dict[str, object]:
-        return {"rule_id": self.rule_id, "path": self.path, "where": self.where,
-                "note": self.note, "cves": list(self.cves)}  # fmt: skip
+        return {
+            "rule_id": self.rule_id,
+            "path": self.path,
+            "where": self.where,
+            "note": self.note,
+            "cves": list(self.cves),
+        }
 
 
 @dataclass
@@ -134,20 +170,24 @@ class Rootfs:
         self._parents(path)
         self._entries[path] = ArchiveEntry(path.encode(), EntryKind.DIR, mode)
 
-    def file(self, path: str, data: bytes | str, mode: int = 0o644, uid: int = 0, gid: int = 0) -> None:
+    def file(
+        self, path: str, data: bytes | str, mode: int = 0o644, uid: int = 0, gid: int = 0
+    ) -> None:
         self._parents(path)
         raw = data.encode() if isinstance(data, str) else data
         self._entries[path] = ArchiveEntry(path.encode(), EntryKind.FILE, mode, uid, gid, raw)
 
     def link(self, path: str, target: str) -> None:
         self._parents(path)
-        self._entries[path] = ArchiveEntry(path.encode(), EntryKind.SYMLINK, 0o777,
-                                           link_target=target.encode())  # fmt: skip
+        self._entries[path] = ArchiveEntry(
+            path.encode(), EntryKind.SYMLINK, 0o777, link_target=target.encode()
+        )
 
     def chardev(self, path: str, major: int, minor: int, mode: int = 0o600) -> None:
         self._parents(path)
-        self._entries[path] = ArchiveEntry(path.encode(), EntryKind.CHARDEV, mode,
-                                           rdev=(major, minor))  # fmt: skip
+        self._entries[path] = ArchiveEntry(
+            path.encode(), EntryKind.CHARDEV, mode, rdev=(major, minor)
+        )
 
     def read(self, path: str) -> bytes:
         return self._entries[path].data
@@ -213,8 +253,15 @@ class _Generator:
         self.startup: list[str] = []
 
     # ---------------------------------------------------------------- helpers
-    def expect(self, rule: str, path: str | None, note: str, *, where: str = "extracted",
-               cves: tuple[str, ...] = ()) -> None:  # fmt: skip
+    def expect(
+        self,
+        rule: str,
+        path: str | None,
+        note: str,
+        *,
+        where: str = "extracted",
+        cves: tuple[str, ...] = (),
+    ) -> None:
         self.expected.append(Expected(rule, path, where, note, cves))
 
     def chance(self, p: float = 0.55) -> bool:
@@ -232,19 +279,43 @@ class _Generator:
     # ---------------------------------------------------------------- base system
     def base(self) -> None:
         fs, rng = self.fs, self.rng
-        for d in ("bin", "sbin", "lib", "usr/bin", "usr/sbin", "usr/lib", "etc/init.d",
-                  "var/run", "proc", "sys", "root", "www"):  # fmt: skip
+        for d in (
+            "bin",
+            "sbin",
+            "lib",
+            "usr/bin",
+            "usr/sbin",
+            "usr/lib",
+            "etc/init.d",
+            "var/run",
+            "proc",
+            "sys",
+            "root",
+            "www",
+        ):
             fs.dir(d, 0o700 if d == "root" else 0o755)
         fs.dir("tmp", 0o1777)
         fs.chardev("dev/console", 5, 1)
         fs.chardev("dev/null", 1, 3, 0o666)
         bb_version = rng.choice(list(COMPONENT_VERSIONS["busybox"]))
         setuid = self.chance(0.5)
-        fs.file("bin/busybox", fake_elf(rng, [_VERSION_STRINGS["busybox"].format(v=bb_version),
-                                              "Usage: busybox [function [arguments]...]"]),
-                mode=0o4755 if setuid else 0o755)  # fmt: skip
+        fs.file(
+            "bin/busybox",
+            fake_elf(
+                rng,
+                [
+                    _VERSION_STRINGS["busybox"].format(v=bb_version),
+                    "Usage: busybox [function [arguments]...]",
+                ],
+            ),
+            mode=0o4755 if setuid else 0o755,
+        )
         for applet in ("bin/sh", "bin/ls", "bin/mount", "sbin/init", "sbin/reboot", "usr/bin/wget"):
-            target = "busybox" if applet.startswith("bin/") else "../" * applet.count("/") + "bin/busybox"
+            target = (
+                "busybox"
+                if applet.startswith("bin/")
+                else "../" * applet.count("/") + "bin/busybox"
+            )
             fs.link(applet, target)
         self._component("busybox", bb_version, "/bin/busybox")
         if setuid:
@@ -258,15 +329,26 @@ class _Generator:
         self.shadow += ["daemon:*:18000:0:99999:7:::", "nobody:!:18000:0:99999:7:::"]
         strong = "".join(rng.choice("abcdefghjkmnpqrstuvwxyz23456789") for _ in range(16))
         self.passwd.append("operator:x:1000:1000:Operator:/home/operator:/bin/sh")
-        self.shadow.append(f"operator:{sha_crypt(strong.encode(), self._salt())}:18000:0:99999:7:::")
+        self.shadow.append(
+            f"operator:{sha_crypt(strong.encode(), self._salt())}:18000:0:99999:7:::"
+        )
         fs.file("etc/hostname", "synth-router\n")
         fs.file("etc/group", "root:x:0:\ndaemon:x:1:\nnogroup:x:65534:\n")
-        fs.file("etc/init.d/S40network",
-                self.text("#!/bin/sh\nifconfig eth0 up\n# telnetd -l /bin/sh   (debug only, "
-                          "disabled)\nudhcpc -i eth0 &\n"), mode=0o755)  # fmt: skip
-        fs.file("etc/default/security.conf",
-                self.text("password_min_len=8\nPASSWORD_HASH_TYPE=sha512\n"
-                          "admin_password=${ADMIN_PASSWORD}\nsession_timeout=300\n"))  # fmt: skip
+        fs.file(
+            "etc/init.d/S40network",
+            self.text(
+                "#!/bin/sh\nifconfig eth0 up\n# telnetd -l /bin/sh   (debug only, "
+                "disabled)\nudhcpc -i eth0 &\n"
+            ),
+            mode=0o755,
+        )
+        fs.file(
+            "etc/default/security.conf",
+            self.text(
+                "password_min_len=8\nPASSWORD_HASH_TYPE=sha512\n"
+                "admin_password=${ADMIN_PASSWORD}\nsession_timeout=300\n"
+            ),
+        )
         fs.file("usr/share/doc/openssl/README", "Built against OpenSSL 1.0.1f  6 Jan 2014\n")
         fs.file("www/index.html", "<html><body>Router</body></html>\n")
         fs.dir("var/log", 0o755)
@@ -282,8 +364,9 @@ class _Generator:
 
     # ---------------------------------------------------------------- plants
     def plant_root_password(self) -> None:
-        choice = self.rng.choice(["empty-shadow", "empty-passwd", "default-md5", "default-sha512",
-                                  "strong"])  # fmt: skip
+        choice = self.rng.choice(
+            ["empty-shadow", "empty-passwd", "default-md5", "default-sha512", "strong"]
+        )
         if choice == "strong":
             pw = "".join(self.rng.choice("ABCDEFGHJKMNPQRSTUVWXYZ23456789") for _ in range(14))
             self.shadow.insert(0, f"root:{sha_crypt(pw.encode(), self._salt())}:18000:0:99999:7:::")
@@ -309,8 +392,10 @@ class _Generator:
     def plant_passwd_hash(self) -> None:
         self.plants.append("hash-in-passwd")
         if self.chance(0.5):
-            des = "".join(self.rng.choice("./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
-                          for _ in range(13))  # fmt: skip
+            des = "".join(
+                self.rng.choice("./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
+                for _ in range(13)
+            )
             self.passwd.append(f"support:{des}:1001:1001:Support:/home/support:/bin/sh")
         else:
             h = md5_crypt(b"support", self._salt())
@@ -329,26 +414,37 @@ class _Generator:
     def plant_config_secret(self) -> None:
         self.plants.append("config-secret")
         kind = self.pick(["kv", "uci", "chpasswd", "url"], ["json", "uci-tab"])
-        secret = "".join(self.rng.choice("abcdefghijkmnopqrstuvwxyzABCDEFGH23456789") for _ in range(12))
+        secret = "".join(
+            self.rng.choice("abcdefghijkmnopqrstuvwxyzABCDEFGH23456789") for _ in range(12)
+        )
         base = self.pick(["/etc/config"], ["/usr/local/etc", "/opt/vendor/etc"])
         if kind == "kv":
             path = f"{base}/cloud.conf"
-            body = f"server=iot.example.invalid\nport=8883\ncloud_api_key = \"{secret}\"\n"
+            body = f'server=iot.example.invalid\nport=8883\ncloud_api_key = "{secret}"\n'
         elif kind in ("uci", "uci-tab"):
             path = f"{base}/system"
             indent = "\t" if kind == "uci-tab" else "  "
-            body = (f"config system\n{indent}option hostname 'router'\n"
-                    f"{indent}option password '{secret}'\n")  # fmt: skip
+            body = (
+                f"config system\n{indent}option hostname 'router'\n"
+                f"{indent}option password '{secret}'\n"
+            )
         elif kind == "chpasswd":
             path = "/etc/init.d/S10setup"
-            body = f"#!/bin/sh\necho \"root:{secret}\" | chpasswd\n"
+            body = f'#!/bin/sh\necho "root:{secret}" | chpasswd\n'
         elif kind == "url":
             path = "/usr/bin/backup.sh"
             body = f"#!/bin/sh\nwget -q ftp://backup:{secret}@10.0.0.2/cfg.tgz -O /tmp/c\n"
         else:
             path = f"{base}/app.json"
-            body = json.dumps({"mqtt": {"host": "10.0.0.5", "admin_password": secret}}, indent=2) + "\n"
-        self.fs.file(path.lstrip("/"), self.text(body), mode=0o755 if path.endswith(".sh") or "init.d" in path else 0o644)
+            body = (
+                json.dumps({"mqtt": {"host": "10.0.0.5", "admin_password": secret}}, indent=2)
+                + "\n"
+            )
+        self.fs.file(
+            path.lstrip("/"),
+            self.text(body),
+            mode=0o755 if path.endswith(".sh") or "init.d" in path else 0o644,
+        )
         self.expect("FWA-CRED-006", path, f"{kind} secret")
 
     def plant_keys(self) -> None:
@@ -365,22 +461,31 @@ class _Generator:
             self.expect("FWA-KEY-001", f"{base}/server.key", "EC private key")
         if self.chance(0.4):
             self.plants.append("encrypted-key")
-            self.fs.file("etc/ssl/private/backup.key", pki.fake_encrypted_pem(self.seed), mode=0o600)
+            self.fs.file(
+                "etc/ssl/private/backup.key", pki.fake_encrypted_pem(self.seed), mode=0o600
+            )
             self.expect("FWA-KEY-001", "/etc/ssl/private/backup.key", "encrypted key envelope")
 
     def plant_dropbear(self) -> None:
         version = self.rng.choice(list(COMPONENT_VERSIONS["dropbear"]))
-        self.fs.file("usr/sbin/dropbear", fake_elf(self.rng, [_VERSION_STRINGS["dropbear"].format(v=version)]),
-                     mode=0o755)  # fmt: skip
+        self.fs.file(
+            "usr/sbin/dropbear",
+            fake_elf(self.rng, [_VERSION_STRINGS["dropbear"].format(v=version)]),
+            mode=0o755,
+        )
         self._component("dropbear", version, "/usr/sbin/dropbear")
         if self.chance(0.6):
             self.plants.append("dropbear-host-key")
             bits = self.rng.choice([1024, 2048])
             key = pki.rsa_key(100 + self.seed % 5, bits)
-            self.fs.file("etc/dropbear/dropbear_rsa_host_key", pki.dropbear_rsa_host_key(key), mode=0o600)
+            self.fs.file(
+                "etc/dropbear/dropbear_rsa_host_key", pki.dropbear_rsa_host_key(key), mode=0o600
+            )
             self.expect("FWA-KEY-001", "/etc/dropbear/dropbear_rsa_host_key", "dropbear host key")
             if bits < 2048:
-                self.expect("FWA-KEY-004", "/etc/dropbear/dropbear_rsa_host_key", "RSA-1024 host key")
+                self.expect(
+                    "FWA-KEY-004", "/etc/dropbear/dropbear_rsa_host_key", "RSA-1024 host key"
+                )
         if self.chance(0.5):
             self.plants.append("dropbear-root-password")
             self.startup.append("/usr/sbin/dropbear -p 22 &")
@@ -391,18 +496,26 @@ class _Generator:
     def plant_libs(self) -> None:
         if self.chance(0.7):
             version = self.rng.choice(list(COMPONENT_VERSIONS["openssl"]))
-            self.fs.file("usr/lib/libcrypto.so.1.0.0", fake_elf(self.rng, [_VERSION_STRINGS["openssl"].format(v=version)]))
+            self.fs.file(
+                "usr/lib/libcrypto.so.1.0.0",
+                fake_elf(self.rng, [_VERSION_STRINGS["openssl"].format(v=version)]),
+            )
             self._component("openssl", version, "/usr/lib/libcrypto.so.1.0.0")
         if self.chance(0.5):
             version = self.rng.choice(list(COMPONENT_VERSIONS["dnsmasq"]))
-            self.fs.file("usr/sbin/dnsmasq", fake_elf(self.rng, [_VERSION_STRINGS["dnsmasq"].format(v=version)]),
-                         mode=0o755)  # fmt: skip
+            self.fs.file(
+                "usr/sbin/dnsmasq",
+                fake_elf(self.rng, [_VERSION_STRINGS["dnsmasq"].format(v=version)]),
+                mode=0o755,
+            )
             self._component("dnsmasq", version, "/usr/sbin/dnsmasq")
 
     def plant_certs(self) -> None:
         ref = REFERENCE_TIME
         key = pki.ec_key(500 + self.seed)
-        valid = pki.certificate(key, "device.local", ref - timedelta(days=400), ref + timedelta(days=3650))
+        valid = pki.certificate(
+            key, "device.local", ref - timedelta(days=400), ref + timedelta(days=3650)
+        )
         if self.holdout and self.chance(0.4):
             path = "/opt/vendor/certs/device.crt"
             self.fs.file(path.lstrip("/"), pki.cert_der(valid))
@@ -412,16 +525,25 @@ class _Generator:
         self.expect("FWA-KEY-006", path, "valid certificate inventory")
         if self.chance(0.5):
             self.plants.append("expired-cert")
-            expired = pki.certificate(pki.ec_key(600 + self.seed), "cloud.example.invalid",
-                                      datetime(2015, 1, 1, tzinfo=UTC), datetime(2020, 1, 1, tzinfo=UTC))  # fmt: skip
+            expired = pki.certificate(
+                pki.ec_key(600 + self.seed),
+                "cloud.example.invalid",
+                datetime(2015, 1, 1, tzinfo=UTC),
+                datetime(2020, 1, 1, tzinfo=UTC),
+            )
             self.fs.file("etc/ssl/certs/cloud.pem", pki.cert_pem(expired))
             self.expect("FWA-KEY-006", "/etc/ssl/certs/cloud.pem", "inventory")
             self.expect("FWA-KEY-002", "/etc/ssl/certs/cloud.pem", "expired 2020")
         if self.chance(0.4):
             self.plants.append("sha1-cert")
             rsa_key = pki.rsa_key(200 + self.seed % 5, 2048)
-            weak = pki.certificate(rsa_key, "legacy.local", ref - timedelta(days=100),
-                                   ref + timedelta(days=30), hash_name="sha1")  # fmt: skip
+            weak = pki.certificate(
+                rsa_key,
+                "legacy.local",
+                ref - timedelta(days=100),
+                ref + timedelta(days=30),
+                hash_name="sha1",
+            )
             self.fs.file("etc/ssl/certs/legacy.pem", pki.cert_pem(weak))
             self.expect("FWA-KEY-006", "/etc/ssl/certs/legacy.pem", "inventory")
             self.expect("FWA-KEY-005", "/etc/ssl/certs/legacy.pem", "SHA-1 signature")
@@ -434,19 +556,35 @@ class _Generator:
             self.startup.append("telnetd -l /bin/sh &")
             self.expect("FWA-SVC-001", "/etc/init.d/rcS", "telnetd -l /bin/sh (critical)")
         elif form == "inittab":
-            self.fs.file("etc/inittab", self.text("::sysinit:/etc/init.d/rcS\n::respawn:/usr/sbin/telnetd -F\n"
-                                                  "::askfirst:-/bin/sh\n"))  # fmt: skip
+            self.fs.file(
+                "etc/inittab",
+                self.text(
+                    "::sysinit:/etc/init.d/rcS\n::respawn:/usr/sbin/telnetd -F\n"
+                    "::askfirst:-/bin/sh\n"
+                ),
+            )
             self.expect("FWA-SVC-001", "/etc/inittab", "telnetd from inittab")
         elif form == "inetd":
-            self.fs.file("etc/inetd.conf", self.text("telnet stream tcp nowait root /usr/sbin/telnetd telnetd\n"))
+            self.fs.file(
+                "etc/inetd.conf",
+                self.text("telnet stream tcp nowait root /usr/sbin/telnetd telnetd\n"),
+            )
             self.expect("FWA-SVC-001", "/etc/inetd.conf", "inetd telnet")
         elif form == "xinetd":
-            self.fs.file("etc/xinetd.d/telnet", self.text(
-                "service telnet\n{\n    disable = no\n    socket_type = stream\n"
-                "    server = /usr/sbin/in.telnetd\n}\n"))  # fmt: skip
+            self.fs.file(
+                "etc/xinetd.d/telnet",
+                self.text(
+                    "service telnet\n{\n    disable = no\n    socket_type = stream\n"
+                    "    server = /usr/sbin/in.telnetd\n}\n"
+                ),
+            )
             self.expect("FWA-SVC-001", "/etc/xinetd.d/telnet", "xinetd telnet")
         else:
-            self.fs.file("etc/rc.local", self.text("#!/bin/sh\n/usr/sbin/telnetd -p 2323\nexit 0\n"), mode=0o755)
+            self.fs.file(
+                "etc/rc.local",
+                self.text("#!/bin/sh\n/usr/sbin/telnetd -p 2323\nexit 0\n"),
+                mode=0o755,
+            )
             self.expect("FWA-SVC-001", "/etc/rc.local", "telnetd from rc.local")
 
     def plant_web(self) -> None:
@@ -470,7 +608,9 @@ class _Generator:
     def plant_ftp_snmp(self) -> None:
         if self.chance(0.5):
             self.plants.append("ftp-anon")
-            self.fs.file("etc/vsftpd.conf", self.text("listen=YES\nanonymous_enable=YES\nlocal_enable=YES\n"))
+            self.fs.file(
+                "etc/vsftpd.conf", self.text("listen=YES\nanonymous_enable=YES\nlocal_enable=YES\n")
+            )
             self.expect("FWA-SVC-003", "/etc/vsftpd.conf", "anonymous ftp")
         else:
             self.fs.file("etc/vsftpd.conf", self.text("listen=YES\nanonymous_enable=NO\n"))
@@ -481,7 +621,9 @@ class _Generator:
             self.fs.file("etc/snmp/snmpd.conf", self.text("sysLocation lab\n" + line))
             self.expect("FWA-SVC-004", "/etc/snmp/snmpd.conf", "rw private" if rw else "ro public")
         else:
-            self.fs.file("etc/snmp/snmpd.conf", self.text("sysLocation lab\nrocommunity Xk29fQ 10.0.0.0/8\n"))
+            self.fs.file(
+                "etc/snmp/snmpd.conf", self.text("sysLocation lab\nrocommunity Xk29fQ 10.0.0.0/8\n")
+            )
 
     def plant_permissions(self) -> None:
         if self.chance(0.5):
@@ -502,8 +644,12 @@ class _Generator:
         secret = "".join(self.rng.choice("abcdefghjkmnpqrstuvwxyz23456789") for _ in range(12))
         inner = Rootfs()
         inner.file("etc/config/admin.conf", f"admin_user=admin\nadmin_password={secret}\n")
-        self.fs.file("etc/config/defaults.tar.gz", gzip.compress(tar_bytes(inner.entries()), mtime=0))
-        self.expect("FWA-CRED-006", "/etc/config/admin.conf", "secret in nested tar.gz", where="nested")
+        self.fs.file(
+            "etc/config/defaults.tar.gz", gzip.compress(tar_bytes(inner.entries()), mtime=0)
+        )
+        self.expect(
+            "FWA-CRED-006", "/etc/config/admin.conf", "secret in nested tar.gz", where="nested"
+        )
 
     # ---------------------------------------------------------------- assembly
     def finish_rootfs(self) -> list[ArchiveEntry]:
@@ -521,12 +667,19 @@ class _Generator:
     def build(self) -> Sample:
         self.base()
         self.plant_root_password()
-        for plant, p in ((self.plant_passwd_hash, 0.35), (self.plant_uid0, 0.35),
-                         (self.plant_config_secret, 0.6), (self.plant_keys, 0.6),
-                         (self.plant_dropbear, 0.7), (self.plant_certs, 1.0),
-                         (self.plant_telnet, 0.55), (self.plant_web, 0.55),
-                         (self.plant_ftp_snmp, 1.0), (self.plant_permissions, 1.0),
-                         (self.plant_nested_backup, 0.35)):  # fmt: skip
+        for plant, p in (
+            (self.plant_passwd_hash, 0.35),
+            (self.plant_uid0, 0.35),
+            (self.plant_config_secret, 0.6),
+            (self.plant_keys, 0.6),
+            (self.plant_dropbear, 0.7),
+            (self.plant_certs, 1.0),
+            (self.plant_telnet, 0.55),
+            (self.plant_web, 0.55),
+            (self.plant_ftp_snmp, 1.0),
+            (self.plant_permissions, 1.0),
+            (self.plant_nested_backup, 0.35),
+        ):
             if self.chance(p):
                 plant()
         self.plant_libs()
@@ -556,8 +709,12 @@ class _Generator:
             return uimage.build(payload, name="synth multi", image_type=4, corrupt_data_crc=corrupt)
         if layout == "uimage-lzma-cpio":
             k = uimage.build(gzip.compress(kernel, mtime=0), name="synth kernel", compression=1)
-            r = uimage.build(lzma_alone(cpio.build_newc(entries)), name="synth ramdisk",
-                             image_type=3, compression=3)  # fmt: skip
+            r = uimage.build(
+                lzma_alone(cpio.build_newc(entries)),
+                name="synth ramdisk",
+                image_type=3,
+                compression=3,
+            )
             return pad_to(k, 4096) + r
         if layout == "tar-xz-update":
             return lzma.compress(tar_bytes(entries), format=lzma.FORMAT_XZ, check=lzma.CHECK_CRC32)

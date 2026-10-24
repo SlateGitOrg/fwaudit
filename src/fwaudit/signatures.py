@@ -162,8 +162,11 @@ def _v_elf(data: memoryview, off: int) -> Meta | None:
         return None
     fmt = "<H" if head[5] == 1 else ">H"
     machine = struct.unpack_from(fmt, head, 18)[0]
-    return {"class": 32 if head[4] == 1 else 64, "endian": "le" if head[5] == 1 else "be",
-            "machine": machine}  # fmt: skip
+    return {
+        "class": 32 if head[4] == 1 else 64,
+        "endian": "le" if head[5] == 1 else "be",
+        "machine": machine,
+    }
 
 
 def _v_cramfs(data: memoryview, off: int) -> Meta | None:
@@ -193,12 +196,17 @@ SIGNATURES: tuple[Signature, ...] = (
     Signature("cpio", b"070707", "cpio archive (odc)", _v_cpio_odc),
     Signature("tar", b"ustar", "POSIX tar archive", _v_tar, magic_offset=tar.USTAR_OFFSET),
     Signature("squashfs", squashfs.SQUASHFS_MAGIC_LE, "SquashFS 4.0 filesystem", _v_squashfs),
-    Signature("squashfs-be", squashfs.SQUASHFS_MAGIC_BE, "big-endian SquashFS (legacy/vendor)",
-              _v_squashfs_be, supported=False),
+    Signature(
+        "squashfs-be",
+        squashfs.SQUASHFS_MAGIC_BE,
+        "big-endian SquashFS (legacy/vendor)",
+        _v_squashfs_be,
+        supported=False,
+    ),
     Signature("cramfs", b"\x45\x3d\xcd\x28", "CramFS filesystem", _v_cramfs, supported=False),
     Signature("elf", b"\x7fELF", "ELF executable", _v_elf, extractable=False),
     Signature("fdt", b"\xd0\x0d\xfe\xed", "flattened device tree", _v_fdt, extractable=False),
-)  # fmt: skip
+)
 
 
 def scan(
@@ -218,8 +226,9 @@ def scan(
                 meta = sig.validate(view, start)
                 if meta is not None:
                     supported = sig.supported and "unsupported" not in meta
-                    hits.append(Hit(start, sig.name, sig.description, sig.extractable,
-                                    supported, meta))  # fmt: skip
+                    hits.append(
+                        Hit(start, sig.name, sig.description, sig.extractable, supported, meta)
+                    )
             pos = data.find(sig.magic, pos + 1)
     order = {s.name: i for i, s in enumerate(signatures)}
     hits.sort(key=lambda h: (h.offset, order[h.name]))

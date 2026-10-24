@@ -61,12 +61,20 @@ class ComponentsCheck:
         out: list[Finding] = []
         for (component, version), paths in sorted(seen.items()):
             paths.sort()
-            out.append(make_finding(
-                "FWA-CMP-001", f"{component} {version} found in {len(paths)} binary(ies)",
-                filesystem=fs.fs_id, path=paths[0],
-                evidence={"component": component, "version": version, "paths": list(paths),
-                          "key": component},
-            ))  # fmt: skip
+            out.append(
+                make_finding(
+                    "FWA-CMP-001",
+                    f"{component} {version} found in {len(paths)} binary(ies)",
+                    filesystem=fs.fs_id,
+                    path=paths[0],
+                    evidence={
+                        "component": component,
+                        "version": version,
+                        "paths": list(paths),
+                        "key": component,
+                    },
+                )
+            )
             hits = self.database.lookup(component, version)
             if not hits:
                 continue
@@ -76,12 +84,21 @@ class ComponentsCheck:
             ]
             worst = max(e.severity for e, _ in hits)
             ids = ", ".join(e.cve_id for e, _ in hits)
-            out.append(make_finding(
-                "FWA-CMP-002",
-                f"{component} {version} is affected by {len(hits)} CVE(s) in the offline "
-                f"subset: {ids}",
-                filesystem=fs.fs_id, path=paths[0], severity=worst,
-                evidence={"component": component, "version": version, "cves": cves,
-                          "paths": list(paths), "key": component},
-            ))  # fmt: skip
+            out.append(
+                make_finding(
+                    "FWA-CMP-002",
+                    f"{component} {version} is affected by {len(hits)} CVE(s) in the offline "
+                    f"subset: {ids}",
+                    filesystem=fs.fs_id,
+                    path=paths[0],
+                    severity=worst,
+                    evidence={
+                        "component": component,
+                        "version": version,
+                        "cves": cves,
+                        "paths": list(paths),
+                        "key": component,
+                    },
+                )
+            )
         return out

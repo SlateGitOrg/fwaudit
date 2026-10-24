@@ -230,14 +230,10 @@ class VirtualFS:
 
     def glob(self, pattern: str) -> list[VNode]:
         """Return nodes whose canonical path matches the fnmatch ``pattern``."""
-        return [
-            self._nodes[p] for p in sorted(self._nodes) if fnmatch.fnmatchcase(p, pattern)
-        ]
+        return [self._nodes[p] for p in sorted(self._nodes) if fnmatch.fnmatchcase(p, pattern)]
 
     def walk_prefix(self, prefix: str) -> list[VNode]:
         prefix = prefix.rstrip("/")
         return [
-            self._nodes[p]
-            for p in sorted(self._nodes)
-            if p == prefix or p.startswith(prefix + "/")
+            self._nodes[p] for p in sorted(self._nodes) if p == prefix or p.startswith(prefix + "/")
         ]

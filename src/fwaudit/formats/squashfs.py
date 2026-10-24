@@ -151,9 +151,7 @@ def parse(data: bytes | memoryview, budget: Budget, *, what: str = "squashfs") -
     if sb.compression not in SUPPORTED:
         raise UnsupportedFormatError(f"squashfs: {sb.compression_name} compression")
     if sb.bytes_used > len(data):
-        raise TruncatedError(
-            f"squashfs: bytes_used {sb.bytes_used} exceeds available {len(data)}"
-        )
+        raise TruncatedError(f"squashfs: bytes_used {sb.bytes_used} exceeds available {len(data)}")
     blob = bytes(data[: sb.bytes_used])
     max_file = budget.limits.max_file_bytes
     entries: list[ArchiveEntry] = []
@@ -178,7 +176,9 @@ def _convert(f: Any, max_file: int, budget: Budget, what: str) -> ArchiveEntry |
     kind = kind_from_mode(mode)
     if kind is None:
         return None
-    name = f.path.encode("utf-8", errors="surrogateescape") if isinstance(f.path, str) else f.path
+    path = f.path if isinstance(f.path, str) else f.path.decode("utf-8", "surrogateescape")
+    # squashfs paths are always absolute; drop the root slash so it is not reported as odd.
+    name = path.lstrip("/").encode("utf-8", errors="surrogateescape") or b"."
     perms = stat.S_IMODE(mode)
     uid, gid = int(f.uid), int(f.gid)
     if kind is EntryKind.FILE:

@@ -99,23 +99,31 @@ class ServicesCheck:
                     detail = f"telnet daemon started on line {n}: {line[:120]!r}"
                     if unauth:
                         detail += " (login program is a shell: no authentication)"
-                    out.append(make_finding(
-                        "FWA-SVC-001", detail, filesystem=fs.fs_id, path=node.path,
-                        severity=Severity.CRITICAL if unauth else None,
-                        evidence={"line": n, "unauthenticated": unauth},
-                    ))  # fmt: skip
+                    out.append(
+                        make_finding(
+                            "FWA-SVC-001",
+                            detail,
+                            filesystem=fs.fs_id,
+                            path=node.path,
+                            severity=Severity.CRITICAL if unauth else None,
+                            evidence={"line": n, "unauthenticated": unauth},
+                        )
+                    )
                     telnet_done = True
                 d = DROPBEAR_RE.search(line)
                 if d and "$" not in d.group("args"):
                     flags = d.group("args")
                     if not re.search(r"(?:^|\s)-[a-zA-Z]*[sg]", flags):
-                        out.append(make_finding(
-                            "FWA-SVC-005",
-                            f"dropbear started without -s/-g on line {n}: root may log in "
-                            "with a password",
-                            filesystem=fs.fs_id, path=node.path,
-                            evidence={"line": n, "key": f"dropbear:{n}"},
-                        ))  # fmt: skip
+                        out.append(
+                            make_finding(
+                                "FWA-SVC-005",
+                                f"dropbear started without -s/-g on line {n}: root may log in "
+                                "with a password",
+                                filesystem=fs.fs_id,
+                                path=node.path,
+                                evidence={"line": n, "key": f"dropbear:{n}"},
+                            )
+                        )
         return out
 
     def _sshd(self, fs: VirtualFS) -> list[Finding]:
@@ -131,10 +139,15 @@ class ServicesCheck:
             root = settings.get("permitrootlogin")
             pw = settings.get("passwordauthentication", (0, "yes"))
             if root and root[1] == "yes" and pw[1] != "no":
-                out.append(make_finding(
-                    "FWA-SVC-005", f"PermitRootLogin yes on line {root[0]}",
-                    filesystem=fs.fs_id, path=node.path, evidence={"line": root[0]},
-                ))  # fmt: skip
+                out.append(
+                    make_finding(
+                        "FWA-SVC-005",
+                        f"PermitRootLogin yes on line {root[0]}",
+                        filesystem=fs.fs_id,
+                        path=node.path,
+                        evidence={"line": root[0]},
+                    )
+                )
         return out
 
     # ------------------------------------------------------------- web credentials
@@ -199,14 +212,23 @@ class ServicesCheck:
             return []
         if config.is_default_pair(user, secret):
             return [self._default_web(fs, node, n, user, secret, config, "plaintext")]
-        return [make_finding(
-            "FWA-CRED-006",
-            f"plaintext web credential for '{user}' = {mask(secret, config.show_secrets)} "
-            f"on line {n}",
-            filesystem=fs.fs_id, path=node.path,
-            evidence={"key": f"{n}:{user}", "name": user, "line": n, "form": "web-plaintext",
-                      "value": mask(secret, config.show_secrets), "known_default": False},
-        )]  # fmt: skip
+        return [
+            make_finding(
+                "FWA-CRED-006",
+                f"plaintext web credential for '{user}' = {mask(secret, config.show_secrets)} "
+                f"on line {n}",
+                filesystem=fs.fs_id,
+                path=node.path,
+                evidence={
+                    "key": f"{n}:{user}",
+                    "name": user,
+                    "line": n,
+                    "form": "web-plaintext",
+                    "value": mask(secret, config.show_secrets),
+                    "known_default": False,
+                },
+            )
+        ]
 
     @staticmethod
     def _default_web(
@@ -218,9 +240,14 @@ class ServicesCheck:
             f"({scheme}) on line {n}",
             filesystem=fs.fs_id,
             path=node.path,
-            evidence={"user": user, "line": n, "scheme": scheme,
-                      "password": mask(pw, config.show_secrets), "key": f"{n}:{user}"},
-        )  # fmt: skip
+            evidence={
+                "user": user,
+                "line": n,
+                "scheme": scheme,
+                "password": mask(pw, config.show_secrets),
+                "key": f"{n}:{user}",
+            },
+        )
 
     # ------------------------------------------------------------- ftp / snmp
     def _ftp(self, fs: VirtualFS) -> list[Finding]:
@@ -229,10 +256,15 @@ class ServicesCheck:
             for n, line in _active_lines(node):
                 key, _, value = line.partition("=")
                 if key.strip().lower() == "anonymous_enable" and value.strip().upper() == "YES":
-                    out.append(make_finding(
-                        "FWA-SVC-003", f"anonymous_enable=YES on line {n}",
-                        filesystem=fs.fs_id, path=node.path, evidence={"line": n},
-                    ))  # fmt: skip
+                    out.append(
+                        make_finding(
+                            "FWA-SVC-003",
+                            f"anonymous_enable=YES on line {n}",
+                            filesystem=fs.fs_id,
+                            path=node.path,
+                            evidence={"line": n},
+                        )
+                    )
         return out
 
     def _snmp(self, fs: VirtualFS) -> list[Finding]:
@@ -247,13 +279,20 @@ class ServicesCheck:
                     community = c.group("community") if c else None
                 if community is None or community.lower() not in DEFAULT_COMMUNITIES:
                     continue
-                out.append(make_finding(
-                    "FWA-SVC-004",
-                    f"SNMP community '{community}' ({'read-write' if writable else 'read'}) "
-                    f"on line {n}",
-                    filesystem=fs.fs_id, path=node.path,
-                    severity=Severity.HIGH if writable else None,
-                    evidence={"line": n, "community": community, "writable": writable,
-                              "key": f"{n}"},
-                ))  # fmt: skip
+                out.append(
+                    make_finding(
+                        "FWA-SVC-004",
+                        f"SNMP community '{community}' ({'read-write' if writable else 'read'}) "
+                        f"on line {n}",
+                        filesystem=fs.fs_id,
+                        path=node.path,
+                        severity=Severity.HIGH if writable else None,
+                        evidence={
+                            "line": n,
+                            "community": community,
+                            "writable": writable,
+                            "key": f"{n}",
+                        },
+                    )
+                )
         return out

@@ -203,9 +203,7 @@ def _to_entry(raw: _Raw, kind: EntryKind, budget: Budget, max_file: int, what: s
         data, truncated = data[:max_file], True
     if kind is EntryKind.SYMLINK:
         budget.charge_bytes(len(data), what)
-        return ArchiveEntry(
-            raw.name, kind, raw.mode & 0o7777, raw.uid, raw.gid, link_target=data
-        )
+        return ArchiveEntry(raw.name, kind, raw.mode & 0o7777, raw.uid, raw.gid, link_target=data)
     budget.charge_bytes(len(data), what)
     rdev = raw.rdev if kind in (EntryKind.CHARDEV, EntryKind.BLOCKDEV) else None
     return ArchiveEntry(
@@ -234,9 +232,15 @@ def _resolve_hardlinks(
             if m is target or m.data:
                 continue
             out.append(
-                ArchiveEntry(m.name, EntryKind.HARDLINK, m.mode & 0o7777, m.uid, m.gid,
-                             link_target=target.name)
-            )  # fmt: skip
+                ArchiveEntry(
+                    m.name,
+                    EntryKind.HARDLINK,
+                    m.mode & 0o7777,
+                    m.uid,
+                    m.gid,
+                    link_target=target.name,
+                )
+            )
     return out
 
 
@@ -245,12 +249,26 @@ def build_newc(entries: list[ArchiveEntry], *, mtime: int = 0) -> bytes:
     out = bytearray()
     ino = 1
 
-    def member(name: bytes, mode: int, uid: int, gid: int, data: bytes, rdev: tuple[int, int]) -> None:
+    def member(
+        name: bytes, mode: int, uid: int, gid: int, data: bytes, rdev: tuple[int, int]
+    ) -> None:
         nonlocal ino
         namesize = len(name) + 1
         fields = (
-            ino, mode, uid, gid, 1, mtime, len(data), 0, 0, rdev[0], rdev[1], namesize, 0,
-        )  # fmt: skip
+            ino,
+            mode,
+            uid,
+            gid,
+            1,
+            mtime,
+            len(data),
+            0,
+            0,
+            rdev[0],
+            rdev[1],
+            namesize,
+            0,
+        )
         header = NEWC_MAGIC + b"".join(b"%08X" % v for v in fields)
         out.extend(header + name + b"\x00")
         out.extend(b"\x00" * (-(len(header) + namesize) % 4))

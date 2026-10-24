@@ -39,17 +39,26 @@ def _tar(members: list[tuple[str, bytes | None, str | None]]) -> bytes:
 
 
 def tar_traversal() -> Sample:
-    image = _tar([
-        ("etc/motd", b"welcome\n", None),
-        ("../../../tmp/fwaudit-pwned", b"#!/bin/sh\necho pwned\n", None),
-        ("/var/www/absolute.txt", b"absolute member, stripped and kept\n", None),
-        ("etclink", None, "/etc"),
-        ("etclink/cron.d/evil", b"* * * * * root /tmp/x\n", None),
-    ])  # fmt: skip
-    return Sample("hostile-tar-traversal", 0, "hostile", "tar", image, [
-        Expected("FWA-EXT-001", None, "extracted", "'..' member"),
-        Expected("FWA-EXT-001", None, "extracted", "write through symlink"),
-    ])  # fmt: skip
+    image = _tar(
+        [
+            ("etc/motd", b"welcome\n", None),
+            ("../../../tmp/fwaudit-pwned", b"#!/bin/sh\necho pwned\n", None),
+            ("/var/www/absolute.txt", b"absolute member, stripped and kept\n", None),
+            ("etclink", None, "/etc"),
+            ("etclink/cron.d/evil", b"* * * * * root /tmp/x\n", None),
+        ]
+    )
+    return Sample(
+        "hostile-tar-traversal",
+        0,
+        "hostile",
+        "tar",
+        image,
+        [
+            Expected("FWA-EXT-001", None, "extracted", "'..' member"),
+            Expected("FWA-EXT-001", None, "extracted", "write through symlink"),
+        ],
+    )
 
 
 def cpio_traversal() -> Sample:
@@ -59,9 +68,16 @@ def cpio_traversal() -> Sample:
         ArchiveEntry(b"bin/../../escape", EntryKind.FILE, 0o644, data=b"escape\n"),
     ]
     image = gzip.compress(cpio.build_newc(entries), mtime=0)
-    return Sample("hostile-cpio-traversal", 0, "hostile", "cpio.gz", image, [
-        Expected("FWA-EXT-001", None, "extracted", "'..' member"),
-    ])  # fmt: skip
+    return Sample(
+        "hostile-cpio-traversal",
+        0,
+        "hostile",
+        "cpio.gz",
+        image,
+        [
+            Expected("FWA-EXT-001", None, "extracted", "'..' member"),
+        ],
+    )
 
 
 def squashfs_traversal() -> Sample:
@@ -70,43 +86,78 @@ def squashfs_traversal() -> Sample:
         ArchiveEntry(b"etc/../../outside", EntryKind.FILE, 0o644, data=b"outside\n"),
     ]
     image = squashfs_writer.build(entries)
-    return Sample("hostile-squashfs-traversal", 0, "hostile", "squashfs", image, [
-        Expected("FWA-EXT-001", None, "extracted", "directory entry named '..' (etc/..)"),
-        Expected("FWA-EXT-001", None, "extracted", "nested '..' directory (etc/../..)"),
-        Expected("FWA-EXT-001", None, "extracted", "file below the '..' entries"),
-    ])  # fmt: skip
+    return Sample(
+        "hostile-squashfs-traversal",
+        0,
+        "hostile",
+        "squashfs",
+        image,
+        [
+            Expected("FWA-EXT-001", None, "extracted", "directory entry named '..' (etc/..)"),
+            Expected("FWA-EXT-001", None, "extracted", "nested '..' directory (etc/../..)"),
+            Expected("FWA-EXT-001", None, "extracted", "file below the '..' entries"),
+        ],
+    )
 
 
 def gzip_bomb() -> Sample:
     image = b"\xff" * 512 + gzip.compress(b"\x00" * BOMB_BYTES, compresslevel=9, mtime=0)
-    return Sample("hostile-gzip-bomb", 0, "hostile", "gzip", image, [
-        Expected("FWA-EXT-002", None, "image", "64 MiB of zeros, ~1000:1"),
-    ])  # fmt: skip
+    return Sample(
+        "hostile-gzip-bomb",
+        0,
+        "hostile",
+        "gzip",
+        image,
+        [
+            Expected("FWA-EXT-002", None, "image", "64 MiB of zeros, ~1000:1"),
+        ],
+    )
 
 
 def xz_bomb() -> Sample:
     image = lzma.compress(b"\x00" * BOMB_BYTES, format=lzma.FORMAT_XZ, check=lzma.CHECK_CRC32)
-    return Sample("hostile-xz-bomb", 0, "hostile", "xz", image, [
-        Expected("FWA-EXT-002", None, "image", "64 MiB of zeros"),
-    ])  # fmt: skip
+    return Sample(
+        "hostile-xz-bomb",
+        0,
+        "hostile",
+        "xz",
+        image,
+        [
+            Expected("FWA-EXT-002", None, "image", "64 MiB of zeros"),
+        ],
+    )
 
 
 def nesting_bomb(levels: int = 12) -> Sample:
     data = b"innermost payload\n" * 8
     for _ in range(levels):
         data = gzip.compress(data, mtime=0)
-    return Sample("hostile-nesting", 0, "hostile", "gzip^12", data, [
-        Expected("FWA-EXT-003", None, "extracted", "nesting deeper than max_depth"),
-    ])  # fmt: skip
+    return Sample(
+        "hostile-nesting",
+        0,
+        "hostile",
+        "gzip^12",
+        data,
+        [
+            Expected("FWA-EXT-003", None, "extracted", "nesting deeper than max_depth"),
+        ],
+    )
 
 
 def tampered_uimage() -> Sample:
     good = uimage.build(gzip.compress(b"kernel " * 2000, mtime=0), name="tampered", compression=1)
     raw = bytearray(good)
     raw[20:24] = b"\x81\x00\x00\x00"  # change the entry point without updating the header CRC
-    return Sample("hostile-uimage-header-crc", 0, "hostile", "uimage", bytes(raw), [
-        Expected("FWA-EXT-004", None, "image", "header CRC mismatch"),
-    ])  # fmt: skip
+    return Sample(
+        "hostile-uimage-header-crc",
+        0,
+        "hostile",
+        "uimage",
+        bytes(raw),
+        [
+            Expected("FWA-EXT-004", None, "image", "header CRC mismatch"),
+        ],
+    )
 
 
 def all_samples() -> list[Sample]:

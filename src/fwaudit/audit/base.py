@@ -81,8 +81,7 @@ def is_probably_text(data: bytes) -> bool:
 
 def numbered_lines(text: str) -> Iterator[tuple[int, str]]:
     """Yield (1-based line number, line) with CR/LF variants normalised."""
-    for i, line in enumerate(text.splitlines(), start=1):
-        yield i, line
+    yield from enumerate(text.splitlines(), start=1)
 
 
 def strip_comment(line: str, marker: str = "#") -> str:
@@ -99,7 +98,9 @@ def strip_comment(line: str, marker: str = "#") -> str:
     return line
 
 
-def text_files(fs: VirtualFS, prefixes: tuple[str, ...], max_bytes: int) -> Iterator[tuple[str, str]]:
+def text_files(
+    fs: VirtualFS, prefixes: tuple[str, ...], max_bytes: int
+) -> Iterator[tuple[str, str]]:
     """(path, decoded text) for regular text files under any of ``prefixes``."""
     for node in fs.files():
         if not node.path.startswith(prefixes):
