@@ -110,7 +110,8 @@ class VirtualFS:
             return None
         parent_problem = self._ensure_parents(path)
         if parent_problem is not None:
-            self.rejections.append(Rejection(raw, parent_problem, traversal=True))
+            reason, through_symlink = parent_problem
+            self.rejections.append(Rejection(raw, reason, traversal=through_symlink))
             return None
         node = self._node_from_entry(path, entry)
         if node is None:
@@ -129,7 +130,12 @@ class VirtualFS:
         self._nodes[path] = node
         return node
 
-    def _ensure_parents(self, path: str) -> str | None:
+    def _ensure_parents(self, path: str) -> tuple[str, bool] | None:
+        """Create missing parent directories; on conflict return (reason, via_symlink).
+
+        Writing *through* a symlinked parent is how archive traversal attacks escape the
+        extraction root, so only that case is flagged as traversal.
+        """
         parts = path.strip("/").split("/")[:-1]
         cur = ""
         for part in parts:
@@ -138,9 +144,9 @@ class VirtualFS:
             if node is None:
                 self._nodes[cur] = VNode(cur, EntryKind.DIR, 0o755)
             elif node.kind is EntryKind.SYMLINK:
-                return f"member would be written through symlink {cur!r}"
+                return f"member would be written through symlink {cur!r}", True
             elif node.kind is not EntryKind.DIR:
-                return f"parent {cur!r} is not a directory"
+                return f"parent {cur!r} is not a directory", False
         return None
 
     def _node_from_entry(self, path: str, entry: ArchiveEntry) -> VNode | None:

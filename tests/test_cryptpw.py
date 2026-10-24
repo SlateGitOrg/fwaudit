@@ -34,7 +34,9 @@ def test_direct_functions() -> None:
 
 
 def test_parse_hash_schemes() -> None:
-    assert parse_hash("$2b$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ012").scheme == "bcrypt"
+    assert (
+        parse_hash("$2b$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ012").scheme == "bcrypt"
+    )
     assert parse_hash("$y$j9T$salt$hash").scheme == "yescrypt"
     des = parse_hash("abJnggxhB/yWI")
     assert des.scheme == "des"

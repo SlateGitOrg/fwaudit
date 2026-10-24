@@ -59,14 +59,20 @@ def test_informational_and_unsupported_signatures() -> None:
 
 def test_validators_reject_lookalikes() -> None:
     garbage = (
-        b"\x1f\x8b\x08\xff" + b"\x00" * 20  # gzip with reserved flags
+        b"\x1f\x8b\x08\xff"
+        + b"\x00" * 20  # gzip with reserved flags
         + b"\xfd7zXZ\x00\x00\x01BAD!"  # xz with wrong CRC
-        + b"\x5d\x00\x00\x00\x00" + b"\x00" * 10  # lzma with zero dictionary
+        + b"\x5d\x00\x00\x00\x00"
+        + b"\x00" * 10  # lzma with zero dictionary
         + b"BZh91AY&SX"  # wrong bzip2 block magic
-        + b"070701" + b"ZZ" * 52  # non-hex cpio
-        + b"070707" + b"99" * 35  # non-octal odc
-        + b"\x27\x05\x19\x56" + b"\x00" * 60  # uImage with type 0
-        + b"hsqs" + b"\x00" * 92  # squashfs with zero block size
+        + b"070701"
+        + b"ZZ" * 52  # non-hex cpio
+        + b"070707"
+        + b"99" * 35  # non-octal odc
+        + b"\x27\x05\x19\x56"
+        + b"\x00" * 60  # uImage with type 0
+        + b"hsqs"
+        + b"\x00" * 92  # squashfs with zero block size
         + b"\x7fELF\x09"  # bad ELF class
     )
     assert scan(garbage) == []

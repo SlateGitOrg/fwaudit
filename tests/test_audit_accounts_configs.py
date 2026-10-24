@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from conftest import FsFactory
-
 from fwaudit.audit.accounts import AccountsCheck, parse_passwd, parse_shadow
 from fwaudit.audit.base import AuditConfig, is_probably_text, mask, strip_comment
 from fwaudit.audit.configs import ConfigSecretsCheck, find_credentials

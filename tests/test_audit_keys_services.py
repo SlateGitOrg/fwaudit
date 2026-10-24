@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 
-from conftest import FsFactory
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
+from conftest import FsFactory
 from fwaudit.audit.base import AuditConfig
 from fwaudit.audit.cryptpw import md5_crypt
 from fwaudit.audit.keys import KeyAnalyzer, KeysCheck, describe_public, parse_dropbear_key

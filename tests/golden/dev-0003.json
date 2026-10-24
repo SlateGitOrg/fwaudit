@@ -1,0 +1,494 @@
+{
+  "check_errors": [],
+  "components": [
+    {
+      "component": "busybox",
+      "cves": [],
+      "filesystem": "image/squashfs@0x10000",
+      "paths": [
+        "/bin/busybox"
+      ],
+      "version": "1.36.1"
+    },
+    {
+      "component": "dnsmasq",
+      "cves": [
+        "CVE-2020-25681"
+      ],
+      "filesystem": "image/squashfs@0x10000",
+      "paths": [
+        "/usr/sbin/dnsmasq"
+      ],
+      "version": "2.80"
+    }
+  ],
+  "entropy": {
+    "block_size": 4096,
+    "mean": 2.96,
+    "regions": [
+      {
+        "end": 12288,
+        "kind": "high",
+        "mean_entropy": 7.924,
+        "start": 0
+      },
+      {
+        "end": 16384,
+        "kind": "mixed",
+        "mean_entropy": 6.344,
+        "start": 12288
+      },
+      {
+        "end": 65536,
+        "kind": "low",
+        "mean_entropy": 0.0,
+        "start": 16384
+      },
+      {
+        "end": 81920,
+        "kind": "high",
+        "mean_entropy": 7.802,
+        "start": 65536
+      },
+      {
+        "end": 196608,
+        "kind": "low",
+        "mean_entropy": 0.03,
+        "start": 81920
+      },
+      {
+        "end": 262144,
+        "kind": "high",
+        "mean_entropy": 7.953,
+        "start": 196608
+      }
+    ],
+    "sparkline": "\u2588\u2588\u2588\u2586            \u2588\u2588\u2588\u2588            \u2581               \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588"
+  },
+  "extraction": [
+    {
+      "children": [
+        "image/uimage@0x0",
+        "image/squashfs@0x10000"
+      ],
+      "depth": 0,
+      "id": "image",
+      "kind": "image",
+      "length": 262144,
+      "meta": {
+        "claimed_bytes": 31069
+      },
+      "notes": [],
+      "offset": 0,
+      "parent": null
+    },
+    {
+      "children": [
+        "image/uimage@0x0/gzip@0x0"
+      ],
+      "depth": 1,
+      "id": "image/uimage@0x0",
+      "kind": "uimage",
+      "length": 15123,
+      "meta": {
+        "arch": "mips",
+        "claimed_bytes": 15059,
+        "compression": "gzip",
+        "data_crc_ok": true,
+        "data_size": 15059,
+        "entry_point": "0x80000000",
+        "header_crc_ok": true,
+        "load_addr": "0x80000000",
+        "name": "synth kernel",
+        "os": "linux",
+        "type": "kernel"
+      },
+      "notes": [],
+      "offset": 0,
+      "parent": "image"
+    },
+    {
+      "children": [],
+      "depth": 2,
+      "id": "image/uimage@0x0/gzip@0x0",
+      "kind": "gzip",
+      "length": 15059,
+      "meta": {
+        "claimed_bytes": 0,
+        "complete": true,
+        "decompressed_size": 71458
+      },
+      "notes": [],
+      "offset": 0,
+      "parent": "image/uimage@0x0"
+    },
+    {
+      "children": [],
+      "depth": 1,
+      "id": "image/squashfs@0x10000",
+      "kind": "squashfs",
+      "length": 15946,
+      "meta": {
+        "block_size": 131072,
+        "compression": "xz",
+        "entries": 54,
+        "file_bytes": 14951,
+        "files": 18
+      },
+      "notes": [],
+      "offset": 65536,
+      "parent": "image"
+    }
+  ],
+  "filesystems": [
+    {
+      "entries": 54,
+      "file_bytes": 14951,
+      "files": 18,
+      "format": "squashfs",
+      "id": "image/squashfs@0x10000",
+      "offset": 65536,
+      "rejected_members": 0
+    }
+  ],
+  "findings": [
+    {
+      "category": "credentials",
+      "detail": "account 'root' can log in without a password",
+      "evidence": {
+        "line": 1,
+        "user": "root"
+      },
+      "filesystem": "image/squashfs@0x10000",
+      "id": "F-cd13bec553ec",
+      "offset": null,
+      "path": "/etc/passwd",
+      "remediation": "Set a password or lock the account ('!' in /etc/shadow).",
+      "rule_id": "FWA-CRED-001",
+      "severity": "critical",
+      "title": "Login account with an empty password"
+    },
+    {
+      "category": "credentials",
+      "detail": "password for 'support' is the default/guessable value su*** (len 7)",
+      "evidence": {
+        "line": 5,
+        "password": "su*** (len 7)",
+        "scheme": "md5",
+        "user": "support"
+      },
+      "filesystem": "image/squashfs@0x10000",
+      "id": "F-ea6d2b997918",
+      "offset": null,
+      "path": "/etc/passwd",
+      "remediation": "Remove factory-default passwords; force a unique password at first boot.",
+      "rule_id": "FWA-CRED-004",
+      "severity": "critical",
+      "title": "Hardcoded default password (hash cracked with the offline default list)"
+    },
+    {
+      "category": "component",
+      "detail": "dnsmasq 2.80 is affected by 1 CVE(s) in the offline subset: CVE-2020-25681",
+      "evidence": {
+        "component": "dnsmasq",
+        "cves": [
+          {
+            "affected": ">= 0, < 2.83",
+            "cvss": 8.1,
+            "id": "CVE-2020-25681",
+            "summary": "DNSpooq: heap overflow sorting RRSets for DNSSEC validation"
+          }
+        ],
+        "paths": [
+          "/usr/sbin/dnsmasq"
+        ],
+        "version": "2.80"
+      },
+      "filesystem": "image/squashfs@0x10000",
+      "id": "F-139eb8a64d3c",
+      "offset": null,
+      "path": "/usr/sbin/dnsmasq",
+      "remediation": "Upgrade the component to a fixed release.",
+      "rule_id": "FWA-CMP-002",
+      "severity": "high",
+      "title": "Component version affected by known CVEs (offline subset)"
+    },
+    {
+      "category": "credentials",
+      "detail": "password hash for 'support' is stored in /etc/passwd",
+      "evidence": {
+        "line": 5,
+        "scheme": "md5",
+        "user": "support"
+      },
+      "filesystem": "image/squashfs@0x10000",
+      "id": "F-8b0fa6e81f3c",
+      "offset": null,
+      "path": "/etc/passwd",
+      "remediation": "Move hashes to /etc/shadow with mode 0600/0640.",
+      "rule_id": "FWA-CRED-002",
+      "severity": "high",
+      "title": "Password hash stored in world-readable /etc/passwd"
+    },
+    {
+      "category": "credentials",
+      "detail": "uci credential 'password' = to*** (len 12) on line 3",
+      "evidence": {
+        "form": "uci",
+        "known_default": false,
+        "line": 3,
+        "name": "password",
+        "value": "to*** (len 12)"
+      },
+      "filesystem": "image/squashfs@0x10000",
+      "id": "F-7b3198650a8e",
+      "offset": null,
+      "path": "/etc/config/system",
+      "remediation": "Provision secrets per device at runtime instead of baking them into the image.",
+      "rule_id": "FWA-CRED-006",
+      "severity": "high",
+      "title": "Hardcoded credential in configuration or script"
+    },
+    {
+      "category": "credentials",
+      "detail": "plaintext web credential for 'webadmin' = ch*** (len 10) on line 2",
+      "evidence": {
+        "form": "web-plaintext",
+        "known_default": false,
+        "line": 2,
+        "name": "webadmin",
+        "value": "ch*** (len 10)"
+      },
+      "filesystem": "image/squashfs@0x10000",
+      "id": "F-95a14646255d",
+      "offset": null,
+      "path": "/etc/httpd.conf",
+      "remediation": "Provision secrets per device at runtime instead of baking them into the image.",
+      "rule_id": "FWA-CRED-006",
+      "severity": "high",
+      "title": "Hardcoded credential in configuration or script"
+    },
+    {
+      "category": "crypto",
+      "detail": "PRIVATE KEY (unencrypted, ec-secp256r1 256 bits)",
+      "evidence": {
+        "algorithm": "ec-secp256r1",
+        "bits": 256,
+        "encrypted": false,
+        "fingerprint": "sha256:a3abab4e73170bd594609eba35962ecfc85b0f83486e4228e8d06ed666939a15",
+        "format": "pem",
+        "label": "PRIVATE KEY",
+        "parsed": true
+      },
+      "filesystem": "image",
+      "id": "F-0f2ec39ac8db",
+      "offset": 131147,
+      "path": null,
+      "remediation": "Generate keys per device at first boot; never ship a shared private key.",
+      "rule_id": "FWA-KEY-001",
+      "severity": "high",
+      "title": "Embedded private key"
+    },
+    {
+      "category": "crypto",
+      "detail": "RSA PRIVATE KEY (unencrypted, rsa 1024 bits)",
+      "evidence": {
+        "algorithm": "rsa",
+        "bits": 1024,
+        "block_offset": 0,
+        "encrypted": false,
+        "fingerprint": "sha256:50c87258ea64d026aa041275b1c1cfccb98cac69861b3920b4bb0497d79b38f0",
+        "format": "pem",
+        "label": "RSA PRIVATE KEY",
+        "parsed": true
+      },
+      "filesystem": "image/squashfs@0x10000",
+      "id": "F-75544ef3e8cc",
+      "offset": null,
+      "path": "/etc/ssl/private/server.key",
+      "remediation": "Generate keys per device at first boot; never ship a shared private key.",
+      "rule_id": "FWA-KEY-001",
+      "severity": "high",
+      "title": "Embedded private key"
+    },
+    {
+      "category": "credentials",
+      "detail": "password for 'support' uses md5 crypt",
+      "evidence": {
+        "line": 5,
+        "scheme": "md5",
+        "user": "support"
+      },
+      "filesystem": "image/squashfs@0x10000",
+      "id": "F-c7f1f512aaa4",
+      "offset": null,
+      "path": "/etc/passwd",
+      "remediation": "Use sha512-crypt, bcrypt or yescrypt.",
+      "rule_id": "FWA-CRED-003",
+      "severity": "medium",
+      "title": "Password hashed with a weak algorithm (DES or MD5 crypt)"
+    },
+    {
+      "category": "crypto",
+      "detail": "private key is RSA-1024",
+      "evidence": {
+        "algorithm": "rsa",
+        "bits": 1024,
+        "block_offset": 0,
+        "subject": "private key"
+      },
+      "filesystem": "image/squashfs@0x10000",
+      "id": "F-0d7874f78c51",
+      "offset": null,
+      "path": "/etc/ssl/private/server.key",
+      "remediation": "Use RSA >= 2048 bits or an elliptic-curve key.",
+      "rule_id": "FWA-KEY-004",
+      "severity": "medium",
+      "title": "Weak key size (RSA/DSA below 2048 bits)"
+    },
+    {
+      "category": "permissions",
+      "detail": "world-writable file in a system directory (-rwxrwxrwx)",
+      "evidence": {
+        "mode": "0o777"
+      },
+      "filesystem": "image/squashfs@0x10000",
+      "id": "F-499e62870d20",
+      "offset": null,
+      "path": "/etc/init.d/S99custom",
+      "remediation": "Remove the world-writable bit.",
+      "rule_id": "FWA-PERM-003",
+      "severity": "medium",
+      "title": "World-writable file in a system directory"
+    },
+    {
+      "category": "component",
+      "detail": "busybox 1.36.1 found in 1 binary(ies)",
+      "evidence": {
+        "component": "busybox",
+        "paths": [
+          "/bin/busybox"
+        ],
+        "version": "1.36.1"
+      },
+      "filesystem": "image/squashfs@0x10000",
+      "id": "F-ac5da859214f",
+      "offset": null,
+      "path": "/bin/busybox",
+      "remediation": "Informational: keep an SBOM of shipped components.",
+      "rule_id": "FWA-CMP-001",
+      "severity": "info",
+      "title": "Third-party component version identified"
+    },
+    {
+      "category": "component",
+      "detail": "dnsmasq 2.80 found in 1 binary(ies)",
+      "evidence": {
+        "component": "dnsmasq",
+        "paths": [
+          "/usr/sbin/dnsmasq"
+        ],
+        "version": "2.80"
+      },
+      "filesystem": "image/squashfs@0x10000",
+      "id": "F-9f79e037bafc",
+      "offset": null,
+      "path": "/usr/sbin/dnsmasq",
+      "remediation": "Informational: keep an SBOM of shipped components.",
+      "rule_id": "FWA-CMP-001",
+      "severity": "info",
+      "title": "Third-party component version identified"
+    },
+    {
+      "category": "extraction",
+      "detail": "65974 bytes at 0x2fe4a have mean entropy 7.91 bits/byte and match no known container",
+      "evidence": {
+        "length": 65974,
+        "mean_entropy": 7.908
+      },
+      "filesystem": "image",
+      "id": "F-dd5c25f3c305",
+      "offset": 196170,
+      "path": null,
+      "remediation": "Determine whether the region is encrypted; encrypted firmware cannot be audited without the vendor key.",
+      "rule_id": "FWA-EXT-006",
+      "severity": "info",
+      "title": "Unidentified high-entropy region (encrypted or unknown compression)"
+    },
+    {
+      "category": "crypto",
+      "detail": "certificate CN=device.local issued by CN=device.local, valid until 2035-12-30",
+      "evidence": {
+        "block_offset": 0,
+        "days_until_expiry": 3650,
+        "issuer": "device.local",
+        "key_algorithm": "ec-secp256r1",
+        "key_bits": 256,
+        "not_after": "2035-12-30T00:00:00+00:00",
+        "not_before": "2024-11-27T00:00:00+00:00",
+        "self_signed": true,
+        "serial": "1",
+        "signature_hash": "sha256",
+        "subject": "device.local"
+      },
+      "filesystem": "image/squashfs@0x10000",
+      "id": "F-9dc38b6cc433",
+      "offset": null,
+      "path": "/etc/ssl/certs/device.pem",
+      "remediation": "Informational: track certificate expiry and ownership.",
+      "rule_id": "FWA-KEY-006",
+      "severity": "info",
+      "title": "Certificate inventory"
+    }
+  ],
+  "image": {
+    "name": "dev-0003-flash-squashfs-xz",
+    "sha256": "4cae71e78ce6faecfb82864916fcf5d21e43351de593a87061880e3ad035038e",
+    "size": 262144
+  },
+  "schema": "fwaudit-report/1",
+  "settings": {
+    "entropy_block_size": 4096,
+    "limits": {
+      "max_carves": 512,
+      "max_depth": 8,
+      "max_entries": 200000,
+      "max_file_bytes": 67108864,
+      "max_image_bytes": 1073741824,
+      "max_path_len": 4096,
+      "max_ratio": 200,
+      "max_stream_bytes": 268435456,
+      "max_total_bytes": 805306368,
+      "ratio_grace_bytes": 4194304
+    },
+    "reference_time": "2026-01-01T00:00:00+00:00",
+    "show_secrets": false
+  },
+  "shared_keys": [],
+  "summary": {
+    "archive_entries": 54,
+    "by_category": {
+      "component": 3,
+      "credentials": 6,
+      "crypto": 4,
+      "extraction": 1,
+      "permissions": 1
+    },
+    "by_severity": {
+      "critical": 2,
+      "high": 6,
+      "info": 4,
+      "low": 0,
+      "medium": 3
+    },
+    "carved_regions": 3,
+    "extracted_bytes": 86409,
+    "filesystems": 1,
+    "findings": 15,
+    "highest_severity": "critical"
+  },
+  "tool": {
+    "name": "fwaudit",
+    "version": "0.1.0"
+  }
+}

@@ -3,8 +3,8 @@ from __future__ import annotations
 import json
 
 import pytest
-from conftest import FsFactory
 
+from conftest import FsFactory
 from fwaudit.audit import CheckRun, default_checks, run_checks
 from fwaudit.audit.base import AuditConfig
 from fwaudit.audit.components import ComponentsCheck, detect

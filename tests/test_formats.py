@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import gzip
 import io
 import struct
@@ -93,7 +94,16 @@ def test_cpio_newc_roundtrip(budget: Budget) -> None:
 
 def _odc_member(name: bytes, mode: int, data: bytes, nlink: int = 1) -> bytes:
     header = b"070707" + b"%06o%06o%06o%06o%06o%06o%06o%011o%06o%011o" % (
-        0, 1, mode, 0, 0, nlink, 0, 0, len(name) + 1, len(data)
+        0,
+        1,
+        mode,
+        0,
+        0,
+        nlink,
+        0,
+        0,
+        len(name) + 1,
+        len(data),
     )
     return header + name + b"\x00" + data
 
@@ -120,7 +130,9 @@ def test_cpio_crc_checksum_and_hardlinks(budget: Budget) -> None:
     good = _newc_member(b"a", 0o100644, data, check=sum(data), magic=b"070702")
     bad = _newc_member(b"b", 0o100644, data, check=1, magic=b"070702")
     link1 = _newc_member(b"l1", 0o100755, b"", ino=9, nlink=2, magic=b"070702")
-    link2 = _newc_member(b"l2", 0o100755, b"elf", ino=9, nlink=2, check=sum(b"elf"), magic=b"070702")
+    link2 = _newc_member(
+        b"l2", 0o100755, b"elf", ino=9, nlink=2, check=sum(b"elf"), magic=b"070702"
+    )
     trailer = _newc_member(b"TRAILER!!!", 0, b"", magic=b"070702")
     res = cpio.parse(good + bad + link1 + link2 + trailer, budget)
     assert res.variant == "crc"
@@ -291,10 +303,8 @@ def test_squashfs_mutations_never_crash(data: st.DataObject) -> None:
     for _ in range(n):
         pos = data.draw(st.integers(min_value=0, max_value=len(blob) - 1))
         blob[pos] = data.draw(st.integers(min_value=0, max_value=255))
-    try:
+    with contextlib.suppress(FormatError, LimitExceededError):
         squashfs.parse(bytes(blob), Budget(Limits()))
-    except (FormatError, LimitExceededError):
-        pass
 
 
 def test_kind_from_mode() -> None:
