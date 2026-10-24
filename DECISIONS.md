@@ -42,6 +42,6 @@ Rulings made while building fwaudit, in the form
 
 ## Tooling
 
-- Ruling: Coverage gate at 90 % branch coverage over the whole package (measured 96.5 %), including the synthetic generator — the contract asks for ≥ 80 % on core logic; the stricter whole-package gate is simpler to state — a future large generator change could block CI on coverage of test-only code.
+- Ruling: Coverage gate at 90 % branch coverage over the whole package (measured 96.3-96.5 %), including the synthetic generator — the contract asks for ≥ 80 % on core logic; the stricter whole-package gate is simpler to state — a future large generator change could block CI on coverage of test-only code.
 - Ruling: Bundle 8 small synthetic images (332 KiB) in `examples/firmware` and assert in tests that they equal the generator output — the demo should run from committed fixtures, and drift is caught — regenerating requires `make fixtures`.
 - Ruling: `scripts/` is on the pytest `pythonpath` so helper scripts are unit-tested without being part of the package — keeps the published package free of evaluation code — scripts are not importable from an installed wheel.

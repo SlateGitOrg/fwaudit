@@ -193,8 +193,9 @@ check ran. Each decoder call is now capped at the ratio allowance for the input 
 far, and `tests/test_compression.py` asserts the bound for all five codecs.
 
 Test suite: 155 tests (unit, integration, Hypothesis property tests that feed random and
-mutated images, golden report, ground truth, hostile samples); branch coverage 96.5%
-(`make coverage`, gate at 90%).
+mutated images, golden report, ground truth, hostile samples); branch coverage 96.3-96.5%
+across runs (`make coverage`, gate at 90%; the range comes from Hypothesis drawing
+different inputs each run).
 
 ## Design decisions
 
