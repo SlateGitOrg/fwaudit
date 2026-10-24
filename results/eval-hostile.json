@@ -1,0 +1,46 @@
+{
+  "elapsed_seconds": 0.17,
+  "expected_findings": 10,
+  "false_negatives": [],
+  "false_positives": [],
+  "image_bytes": 90512,
+  "label": "hostile extraction samples",
+  "per_rule": {
+    "FWA-EXT-001": {
+      "fn": 0,
+      "fp": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "tp": 6
+    },
+    "FWA-EXT-002": {
+      "fn": 0,
+      "fp": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "tp": 2
+    },
+    "FWA-EXT-003": {
+      "fn": 0,
+      "fp": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "tp": 1
+    },
+    "FWA-EXT-004": {
+      "fn": 0,
+      "fp": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "tp": 1
+    }
+  },
+  "samples": 7,
+  "totals": {
+    "fn": 0,
+    "fp": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "tp": 10
+  }
+}

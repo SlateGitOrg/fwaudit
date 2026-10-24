@@ -1,0 +1,444 @@
+{
+  "elapsed_seconds": 8.08,
+  "expected_findings": 1831,
+  "false_negatives": [
+    [
+      "holdout-0004-tar-xz-update",
+      [
+        "FWA-CRED-006",
+        "/etc/config/app.json",
+        "extracted"
+      ],
+      []
+    ],
+    [
+      "holdout-0006-uimage-lzma-cpio",
+      [
+        "FWA-SVC-001",
+        "/etc/xinetd.d/telnet",
+        "extracted"
+      ],
+      []
+    ],
+    [
+      "holdout-0009-tar-xz-update",
+      [
+        "FWA-SVC-001",
+        "/etc/xinetd.d/telnet",
+        "extracted"
+      ],
+      []
+    ],
+    [
+      "holdout-0020-uimage-multi-cpio",
+      [
+        "FWA-CRED-006",
+        "/opt/vendor/etc/app.json",
+        "extracted"
+      ],
+      []
+    ],
+    [
+      "holdout-0027-flash-squashfs-gzip",
+      [
+        "FWA-CRED-006",
+        "/usr/local/etc/app.json",
+        "extracted"
+      ],
+      []
+    ],
+    [
+      "holdout-0029-tar-xz-update",
+      [
+        "FWA-CRED-006",
+        "/usr/local/etc/app.json",
+        "extracted"
+      ],
+      []
+    ],
+    [
+      "holdout-0030-uimage-multi-cpio",
+      [
+        "FWA-CRED-006",
+        "/etc/config/app.json",
+        "extracted"
+      ],
+      []
+    ],
+    [
+      "holdout-0032-flash-squashfs-gzip",
+      [
+        "FWA-SVC-001",
+        "/etc/xinetd.d/telnet",
+        "extracted"
+      ],
+      []
+    ],
+    [
+      "holdout-0033-flash-squashfs-xz",
+      [
+        "FWA-CRED-006",
+        "/usr/local/etc/app.json",
+        "extracted"
+      ],
+      []
+    ],
+    [
+      "holdout-0035-uimage-multi-cpio",
+      [
+        "FWA-CRED-006",
+        "/opt/vendor/etc/app.json",
+        "extracted"
+      ],
+      []
+    ],
+    [
+      "holdout-0041-uimage-lzma-cpio",
+      [
+        "FWA-CRED-006",
+        "/usr/local/etc/app.json",
+        "extracted"
+      ],
+      []
+    ],
+    [
+      "holdout-0042-flash-squashfs-gzip",
+      [
+        "FWA-SVC-001",
+        "/etc/xinetd.d/telnet",
+        "extracted"
+      ],
+      []
+    ],
+    [
+      "holdout-0046-uimage-lzma-cpio",
+      [
+        "FWA-CRED-006",
+        "/opt/vendor/etc/app.json",
+        "extracted"
+      ],
+      []
+    ],
+    [
+      "holdout-0052-flash-squashfs-gzip",
+      [
+        "FWA-SVC-001",
+        "/etc/xinetd.d/telnet",
+        "extracted"
+      ],
+      []
+    ],
+    [
+      "holdout-0053-flash-squashfs-xz",
+      [
+        "FWA-SVC-001",
+        "/etc/xinetd.d/telnet",
+        "extracted"
+      ],
+      []
+    ],
+    [
+      "holdout-0064-tar-xz-update",
+      [
+        "FWA-CRED-006",
+        "/opt/vendor/etc/app.json",
+        "extracted"
+      ],
+      []
+    ],
+    [
+      "holdout-0064-tar-xz-update",
+      [
+        "FWA-SVC-001",
+        "/etc/xinetd.d/telnet",
+        "extracted"
+      ],
+      []
+    ],
+    [
+      "holdout-0066-uimage-lzma-cpio",
+      [
+        "FWA-CRED-006",
+        "/usr/local/etc/app.json",
+        "extracted"
+      ],
+      []
+    ],
+    [
+      "holdout-0069-tar-xz-update",
+      [
+        "FWA-CRED-006",
+        "/opt/vendor/etc/app.json",
+        "extracted"
+      ],
+      []
+    ],
+    [
+      "holdout-0072-flash-squashfs-gzip",
+      [
+        "FWA-SVC-001",
+        "/etc/xinetd.d/telnet",
+        "extracted"
+      ],
+      []
+    ],
+    [
+      "holdout-0077-flash-squashfs-gzip",
+      [
+        "FWA-SVC-001",
+        "/etc/xinetd.d/telnet",
+        "extracted"
+      ],
+      []
+    ],
+    [
+      "holdout-0078-flash-squashfs-xz",
+      [
+        "FWA-CRED-006",
+        "/opt/vendor/etc/app.json",
+        "extracted"
+      ],
+      []
+    ],
+    [
+      "holdout-0082-flash-squashfs-gzip",
+      [
+        "FWA-SVC-001",
+        "/etc/xinetd.d/telnet",
+        "extracted"
+      ],
+      []
+    ],
+    [
+      "holdout-0089-tar-xz-update",
+      [
+        "FWA-CRED-006",
+        "/usr/local/etc/app.json",
+        "extracted"
+      ],
+      []
+    ],
+    [
+      "holdout-0091-uimage-lzma-cpio",
+      [
+        "FWA-CRED-006",
+        "/etc/config/app.json",
+        "extracted"
+      ],
+      []
+    ],
+    [
+      "holdout-0094-tar-xz-update",
+      [
+        "FWA-SVC-001",
+        "/etc/xinetd.d/telnet",
+        "extracted"
+      ],
+      []
+    ],
+    [
+      "holdout-0095-uimage-multi-cpio",
+      [
+        "FWA-CRED-006",
+        "/etc/config/app.json",
+        "extracted"
+      ],
+      []
+    ]
+  ],
+  "false_positives": [],
+  "image_bytes": 11484154,
+  "label": "holdout split, seeds 0-99",
+  "per_rule": {
+    "FWA-CMP-001": {
+      "fn": 0,
+      "fp": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "tp": 292
+    },
+    "FWA-CMP-002": {
+      "fn": 0,
+      "fp": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "tp": 215
+    },
+    "FWA-CRED-001": {
+      "fn": 0,
+      "fp": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "tp": 44
+    },
+    "FWA-CRED-002": {
+      "fn": 0,
+      "fp": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "tp": 35
+    },
+    "FWA-CRED-003": {
+      "fn": 0,
+      "fp": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "tp": 50
+    },
+    "FWA-CRED-004": {
+      "fn": 0,
+      "fp": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "tp": 52
+    },
+    "FWA-CRED-005": {
+      "fn": 0,
+      "fp": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "tp": 33
+    },
+    "FWA-CRED-006": {
+      "fn": 16,
+      "fp": 0,
+      "precision": 1.0,
+      "recall": 0.8644,
+      "tp": 102
+    },
+    "FWA-CRED-007": {
+      "fn": 0,
+      "fp": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "tp": 28
+    },
+    "FWA-EXT-004": {
+      "fn": 0,
+      "fp": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "tp": 5
+    },
+    "FWA-EXT-006": {
+      "fn": 0,
+      "fp": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "tp": 23
+    },
+    "FWA-KEY-001": {
+      "fn": 0,
+      "fp": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "tp": 147
+    },
+    "FWA-KEY-002": {
+      "fn": 0,
+      "fp": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "tp": 43
+    },
+    "FWA-KEY-003": {
+      "fn": 0,
+      "fp": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "tp": 38
+    },
+    "FWA-KEY-004": {
+      "fn": 0,
+      "fp": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "tp": 60
+    },
+    "FWA-KEY-005": {
+      "fn": 0,
+      "fp": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "tp": 38
+    },
+    "FWA-KEY-006": {
+      "fn": 0,
+      "fp": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "tp": 181
+    },
+    "FWA-PERM-001": {
+      "fn": 0,
+      "fp": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "tp": 48
+    },
+    "FWA-PERM-002": {
+      "fn": 0,
+      "fp": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "tp": 43
+    },
+    "FWA-PERM-003": {
+      "fn": 0,
+      "fp": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "tp": 49
+    },
+    "FWA-PERM-004": {
+      "fn": 0,
+      "fp": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "tp": 58
+    },
+    "FWA-SVC-001": {
+      "fn": 11,
+      "fp": 0,
+      "precision": 1.0,
+      "recall": 0.8226,
+      "tp": 51
+    },
+    "FWA-SVC-002": {
+      "fn": 0,
+      "fp": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "tp": 36
+    },
+    "FWA-SVC-003": {
+      "fn": 0,
+      "fp": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "tp": 50
+    },
+    "FWA-SVC-004": {
+      "fn": 0,
+      "fp": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "tp": 54
+    },
+    "FWA-SVC-005": {
+      "fn": 0,
+      "fp": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "tp": 29
+    }
+  },
+  "samples": 100,
+  "totals": {
+    "fn": 27,
+    "fp": 0,
+    "precision": 1.0,
+    "recall": 0.9853,
+    "tp": 1804
+  }
+}
