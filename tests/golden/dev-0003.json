@@ -472,7 +472,7 @@
   ],
   "image": {
     "name": "dev-0003-flash-squashfs-xz",
-    "sha256": "4cae71e78ce6faecfb82864916fcf5d21e43351de593a87061880e3ad035038e",
+    "sha256": "d17e50f821f7bf75a81fb6c720310caf59f59b851aefafb5c782b5dc7db03b3a",
     "size": 262144
   },
   "schema": "fwaudit-report/1",

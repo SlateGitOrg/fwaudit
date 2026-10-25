@@ -167,5 +167,6 @@ contains no wall-clock time, so the same image and settings give a byte-identica
 `synth/firmware.py` builds every image in memory from a `random.Random(f"{split}:{seed}")`,
 so a sample is reproducible from its name. Keys come from seeded primes (RSA) or
 `derive_private_key` (EC), and certificates use deterministic signatures (PKCS#1 v1.5 or
-RFC 6979 ECDSA), so images are byte-identical across runs and machines. The generator
+RFC 6979 ECDSA), and gzip members are written with a fixed header instead of the one
+zlib stamps with its build OS, so images are byte-identical across runs and machines. The generator
 records an `Expected` entry for every planted weakness at the moment it plants it.

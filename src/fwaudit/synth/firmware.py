@@ -17,13 +17,13 @@ ranges, not by calling fwaudit's own matcher, so the evaluation checks the match
 
 from __future__ import annotations
 
-import gzip
 import io
 import json
 import lzma
 import random
 import struct
 import tarfile
+import zlib
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 
@@ -225,6 +225,23 @@ def tar_bytes(entries: list[ArchiveEntry]) -> bytes:
                 info.devmajor, info.devminor = e.rdev or (0, 0)
             tf.addfile(info)
     return buf.getvalue()
+
+
+GZIP_HEADER = b"\x1f\x8b\x08\x00\x00\x00\x00\x00\x02\x03"
+
+
+def gzip_member(data: bytes) -> bytes:
+    """Single-member gzip stream whose bytes do not depend on the host platform.
+
+    ``gzip.compress(data, mtime=0)`` delegates the whole stream to zlib, and zlib writes
+    the OS it was built for into the header (19 on macOS, 3 on Linux), so the same seed
+    produced different fixture bytes on different machines. The header here is fixed: no
+    flags, mtime 0, XFL 2 (maximum compression) and OS 3 (Unix, which is what firmware
+    build hosts emit). Only the raw level-9 deflate stream comes from zlib, followed by
+    the standard CRC-32 and size trailer.
+    """
+    body = zlib.compress(data, 9, wbits=-zlib.MAX_WBITS)
+    return GZIP_HEADER + body + struct.pack("<II", zlib.crc32(data), len(data) & 0xFFFFFFFF)
 
 
 def lzma_alone(data: bytes) -> bytes:
@@ -644,9 +661,7 @@ class _Generator:
         secret = "".join(self.rng.choice("abcdefghjkmnpqrstuvwxyz23456789") for _ in range(12))
         inner = Rootfs()
         inner.file("etc/config/admin.conf", f"admin_user=admin\nadmin_password={secret}\n")
-        self.fs.file(
-            "etc/config/defaults.tar.gz", gzip.compress(tar_bytes(inner.entries()), mtime=0)
-        )
+        self.fs.file("etc/config/defaults.tar.gz", gzip_member(tar_bytes(inner.entries())))
         self.expect(
             "FWA-CRED-006", "/etc/config/admin.conf", "secret in nested tar.gz", where="nested"
         )
@@ -700,7 +715,7 @@ class _Generator:
         kernel = self.kernel()
         if layout == "uimage-multi-cpio":
             payload = uimage.build_multi_payload(
-                [gzip.compress(kernel, mtime=0), gzip.compress(cpio.build_newc(entries), mtime=0)]
+                [gzip_member(kernel), gzip_member(cpio.build_newc(entries))]
             )
             corrupt = self.chance(0.4)
             if corrupt:
@@ -708,7 +723,7 @@ class _Generator:
                 self.expect("FWA-EXT-004", None, "data CRC corrupted", where="image")
             return uimage.build(payload, name="synth multi", image_type=4, corrupt_data_crc=corrupt)
         if layout == "uimage-lzma-cpio":
-            k = uimage.build(gzip.compress(kernel, mtime=0), name="synth kernel", compression=1)
+            k = uimage.build(gzip_member(kernel), name="synth kernel", compression=1)
             r = uimage.build(
                 lzma_alone(cpio.build_newc(entries)),
                 name="synth ramdisk",
@@ -719,7 +734,7 @@ class _Generator:
         if layout == "tar-xz-update":
             return lzma.compress(tar_bytes(entries), format=lzma.FORMAT_XZ, check=lzma.CHECK_CRC32)
         compression = "gzip" if layout == "flash-squashfs-gzip" else "xz"
-        k = uimage.build(gzip.compress(kernel, mtime=0), name="synth kernel", compression=1)
+        k = uimage.build(gzip_member(kernel), name="synth kernel", compression=1)
         image = pad_to(k, ERASE_BLOCK)
         image += pad_to(squashfs_writer.build(entries, compression=compression), ERASE_BLOCK)
         image += pad_to(self.nvram(), ERASE_BLOCK)

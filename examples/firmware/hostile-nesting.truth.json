@@ -3,7 +3,7 @@
   "seed": 0,
   "split": "hostile",
   "layout": "gzip^12",
-  "size": 265,
+  "size": 264,
   "plants": [],
   "reference_time": "2026-01-01T00:00:00+00:00",
   "expected": [

@@ -1,9 +1,9 @@
 {
-  "elapsed_seconds": 8.02,
+  "elapsed_seconds": 8.08,
   "expected_findings": 1838,
   "false_negatives": [],
   "false_positives": [],
-  "image_bytes": 11385508,
+  "image_bytes": 11385507,
   "label": "holdout split, seeds 100-199",
   "per_rule": {
     "FWA-CMP-001": {

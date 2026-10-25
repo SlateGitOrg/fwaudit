@@ -1,9 +1,9 @@
 {
-  "elapsed_seconds": 0.02,
+  "elapsed_seconds": 0.03,
   "expected_findings": 10,
   "false_negatives": [],
   "false_positives": [],
-  "image_bytes": 90512,
+  "image_bytes": 90511,
   "label": "hostile extraction samples",
   "per_rule": {
     "FWA-EXT-001": {

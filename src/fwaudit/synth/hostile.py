@@ -7,7 +7,6 @@ auditing them never touches the host filesystem and stays within the memory budg
 
 from __future__ import annotations
 
-import gzip
 import io
 import lzma
 import tarfile
@@ -15,7 +14,7 @@ import tarfile
 from fwaudit.formats import cpio, uimage
 from fwaudit.formats.entries import ArchiveEntry, EntryKind
 from fwaudit.synth import squashfs_writer
-from fwaudit.synth.firmware import Expected, Sample
+from fwaudit.synth.firmware import Expected, Sample, gzip_member
 
 BOMB_BYTES = 64 * 1024 * 1024
 
@@ -67,7 +66,7 @@ def cpio_traversal() -> Sample:
         ArchiveEntry(b"bin/ok", EntryKind.FILE, 0o755, data=b"ok\n"),
         ArchiveEntry(b"bin/../../escape", EntryKind.FILE, 0o644, data=b"escape\n"),
     ]
-    image = gzip.compress(cpio.build_newc(entries), mtime=0)
+    image = gzip_member(cpio.build_newc(entries))
     return Sample(
         "hostile-cpio-traversal",
         0,
@@ -101,7 +100,7 @@ def squashfs_traversal() -> Sample:
 
 
 def gzip_bomb() -> Sample:
-    image = b"\xff" * 512 + gzip.compress(b"\x00" * BOMB_BYTES, compresslevel=9, mtime=0)
+    image = b"\xff" * 512 + gzip_member(b"\x00" * BOMB_BYTES)
     return Sample(
         "hostile-gzip-bomb",
         0,
@@ -131,7 +130,7 @@ def xz_bomb() -> Sample:
 def nesting_bomb(levels: int = 12) -> Sample:
     data = b"innermost payload\n" * 8
     for _ in range(levels):
-        data = gzip.compress(data, mtime=0)
+        data = gzip_member(data)
     return Sample(
         "hostile-nesting",
         0,
@@ -145,7 +144,7 @@ def nesting_bomb(levels: int = 12) -> Sample:
 
 
 def tampered_uimage() -> Sample:
-    good = uimage.build(gzip.compress(b"kernel " * 2000, mtime=0), name="tampered", compression=1)
+    good = uimage.build(gzip_member(b"kernel " * 2000), name="tampered", compression=1)
     raw = bytearray(good)
     raw[20:24] = b"\x81\x00\x00\x00"  # change the entry point without updating the header CRC
     return Sample(
