@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Offline firmware image auditor: identification, safe extraction, entropy map and filesystem security audit."
 readme = "README.md"
 license = "MIT"
-authors = [{ name = "archit2501" }]
+authors = [{ name = "fwaudit contributors" }]
 requires-python = ">=3.12"
 dependencies = [
     "cryptography==50.0.2",

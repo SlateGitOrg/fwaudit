@@ -1,36 +1,36 @@
 {
-  "machine": "Darwin arm64, Python 3.12.13",
+  "machine": "Darwin arm64, Python 3.12.11",
   "repeat": 5,
   "raw_throughput": {
     "buffer_mib": 64,
-    "entropy_map_mib_per_s": 189.1,
-    "signature_scan_mib_per_s": 92.4
+    "entropy_map_mib_per_s": 287.3,
+    "signature_scan_mib_per_s": 155.3
   },
   "audit_per_layout": [
     {
       "sample": "dev-0000-uimage-multi-cpio",
       "image_kib": 42.2,
-      "audit_ms": 60.5
+      "audit_ms": 41.9
     },
     {
       "sample": "dev-0001-uimage-lzma-cpio",
       "image_kib": 49.2,
-      "audit_ms": 65.0
+      "audit_ms": 42.7
     },
     {
       "sample": "dev-0002-flash-squashfs-gzip",
       "image_kib": 192.0,
-      "audit_ms": 77.8
+      "audit_ms": 54.0
     },
     {
       "sample": "dev-0003-flash-squashfs-xz",
       "image_kib": 256.0,
-      "audit_ms": 79.1
+      "audit_ms": 59.2
     },
     {
       "sample": "dev-0004-tar-xz-update",
       "image_kib": 35.6,
-      "audit_ms": 67.9
+      "audit_ms": 46.6
     }
   ],
   "hostile": [
@@ -38,7 +38,7 @@
       "sample": "hostile-gzip-bomb",
       "image_bytes": 65762,
       "declared_payload_mib": 64,
-      "audit_ms": 5.3,
+      "audit_ms": 7.6,
       "peak_traced_mib": 25.0,
       "extracted_bytes": 0,
       "rules": [
@@ -49,7 +49,7 @@
       "sample": "hostile-xz-bomb",
       "image_bytes": 9892,
       "declared_payload_mib": 64,
-      "audit_ms": 8.2,
+      "audit_ms": 13.9,
       "peak_traced_mib": 16.1,
       "extracted_bytes": 0,
       "rules": [
@@ -58,11 +58,11 @@
     },
     {
       "sample": "hostile-nesting",
-      "image_bytes": 265,
+      "image_bytes": 264,
       "declared_payload_mib": null,
-      "audit_ms": 0.7,
+      "audit_ms": 0.5,
       "peak_traced_mib": 0.1,
-      "extracted_bytes": 1357,
+      "extracted_bytes": 1347,
       "rules": [
         "FWA-EXT-003"
       ]
